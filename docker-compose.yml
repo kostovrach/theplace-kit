@@ -1,0 +1,46 @@
+services:
+    postgres:
+        image: postgis/postgis:15-3.5 # При отсутсвии надобности пространственного раширения исполдьзовать postgres:15
+        container_name: directus_postgres
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+    directus:
+        build:
+            context: ./cms
+            dockerfile: Dockerfile
+        container_name: directus_app
+        restart: unless-stopped
+        ports:
+            - '8055:8055'
+        environment:
+            KEY: ${KEY}
+            SECRET: ${SECRET}
+            ADMIN_EMAIL: ${ADMIN_EMAIL}
+            ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+            PUBLIC_URL: ${PUBLIC_URL}
+            DB_CLIENT: postgres
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_DATABASE: ${POSTGRES_DB}
+            DB_USER: ${POSTGRES_USER}
+            DB_PASSWORD: ${POSTGRES_PASSWORD}
+            STORAGE_LOCATIONS: ${STORAGE_LOCATIONS}
+            STORAGE_LOCAL_DRIVER: ${STORAGE_LOCAL_DRIVER}
+            STORAGE_LOCAL_ROOT: ${STORAGE_LOCAL_ROOT}
+            CORS_ENABLED: ${CORS_ENABLED}
+            CORS_ORIGIN: ${CORS_ORIGIN}
+        volumes:
+            - ${PWD}/cms/uploads:/directus/uploads
+            - ${PWD}/cms/extensions:/directus/extensions
+            - ${PWD}/cms/backups:/directus/backups
+        depends_on:
+            - postgres
+
+volumes:
+    postgres_data:

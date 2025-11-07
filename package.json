@@ -1,0 +1,10 @@
+{
+	"scripts": {
+		"db:enter": "docker exec -it directus_postgres psql -U directus -d postgres",
+		"db:init-postgis": "docker exec -i directus_postgres psql -U directus -d directus < scripts/init_postgis.sql",
+		"db:backup": "docker exec -t directus_postgres pg_dump -U directus directus > ./cms/backups/backup.sql",
+		"db:restore": "docker exec -i directus_postgres psql -U directus -d directus < ./cms/backups/backup.sql",
+		"schema:backup": "docker exec -it directus_app npx directus schema snapshot ./cms/backups/schema.yaml",
+		"schema:restore": "docker exec -it directus_app npx directus schema apply ./cms/backups/schema.yaml"
+	}
+}

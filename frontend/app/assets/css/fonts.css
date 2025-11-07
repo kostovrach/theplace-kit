@@ -1,0 +1,23 @@
+/* Inter */
+@font-face {
+    font-family: 'Inter';
+    font-display: swap;
+    src:
+        url('../fonts/Inter-Variable.woff2') format('woff2'),
+        url('../fonts/Inter-Variable.ttf') format('ttf');
+    font-weight: 350 900;
+    font-style: normal;
+}
+
+/* --------------------Static font example-------------------- */
+
+/* @font-face {
+    font-family: 'Static Font';
+    font-display: swap;
+    src:
+        url('../fonts/Your-Font.woff2') format('woff2'),
+        url('../fonts/Your-Font.woff') format('woff'),
+        url('../fonts/Your-Font.ttf') format('ttf');
+    font-weight: 400;
+    font-style: normal;
+} */

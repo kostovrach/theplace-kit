@@ -1,0 +1,220 @@
+@use './functions' as *;
+@use './colors' as *;
+@use './variables' as *;
+
+// layout
+@mixin content-container($max-width: rem(1920), $padding: 0 $px) {
+    max-width: $max-width;
+    margin: 0 auto;
+    padding: $padding;
+}
+
+@mixin content-block($margin: rem(128)) {
+    margin: $margin 0;
+}
+
+// components
+
+@mixin skeleton(
+    $color: $skeleton-color,
+    $anim-color: linear-gradient(90deg, transparent, rgba(#ffffff, 0.4), transparent)
+) {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background-color: $color;
+    border-radius: rem(8);
+    overflow: hidden;
+    &::before {
+        content: '';
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        background: $anim-color;
+        animation: skeleton-anim 1.2s ease infinite;
+        pointer-events: none;
+    }
+    @keyframes skeleton-anim {
+        from {
+            translate: -100%;
+        }
+        to {
+            translate: 100%;
+        }
+    }
+}
+
+@mixin checkbox($size: rem(24), $accent-color: $c-000000, $contrast-color: $c-FFFFFF) {
+    cursor: pointer;
+    position: relative;
+    width: $size;
+    height: $size;
+    aspect-ratio: 1/1;
+    border: rem(1) solid $accent-color;
+    > input[type='checkbox'] {
+        cursor: pointer;
+        position: absolute;
+        z-index: 1;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+    }
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        width: rem(14);
+        height: rem(2);
+        opacity: 0;
+        transition: all calc($td / 2) $tf;
+        pointer-events: none;
+    }
+    @media (pointer: fine) {
+        &:hover {
+            &::before,
+            &::after {
+                background-color: $accent-color;
+                opacity: 1;
+            }
+            &::before {
+                rotate: 90deg;
+            }
+        }
+    }
+    &:has(input:checked) {
+        background-color: $accent-color;
+        &::before,
+        &::after {
+            background-color: $contrast-color;
+            opacity: 1;
+        }
+        &::before {
+            left: 63%;
+            width: rem(12);
+            rotate: 135deg;
+        }
+        &::after {
+            left: 30%;
+            top: 60%;
+            width: rem(10);
+            rotate: -135deg;
+        }
+    }
+}
+
+// effects
+@mixin gradient-text-hover($main-color: $c-000000, $accent-color: $c-FFFFFF) {
+    @supports (background-clip: text) {
+        color: transparent;
+        background-clip: text;
+        background-image: linear-gradient(90deg, $accent-color 50%, $main-color 50%);
+        background-size: 250% 200%;
+        background-position: -80% -100%;
+        transition: background-position $td $tf;
+        @media (pointer: fine) {
+            &:hover {
+                background-position: -160% -200%;
+            }
+        }
+    }
+    @supports not (background-clip: text) {
+        transition: color $td $tf;
+        @media (pointer: fine) {
+            &:hover {
+                color: $accent-color;
+            }
+        }
+    }
+}
+
+@mixin hover-underline($color: currentColor) {
+    position: relative;
+    width: fit-content;
+    line-height: 1.5;
+    transition: all $td $tf;
+    &::after {
+        content: '';
+        display: block;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: rem(2);
+        width: 0;
+        background-color: $color;
+        transition: $td $tf;
+    }
+    @media (pointer: fine) {
+        &:hover {
+            color: $color;
+            &::after {
+                width: 100%;
+            }
+        }
+    }
+}
+
+@mixin hover-blick-line($init-color: currentColor, $anim-color: $c-000000) {
+    position: relative;
+    line-height: 1.5;
+    color: $init-color;
+    transition: color $td $tf;
+    overflow: hidden;
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 0;
+        height: rem(1);
+        background-color: $init-color;
+        transition: all $td $tf;
+    }
+    @media (pointer: fine) {
+        &:hover {
+            color: $anim-color;
+            &::before {
+                width: 100%;
+                translate: 100%;
+                background-color: $anim-color;
+            }
+        }
+    }
+}
+
+// tech
+@mixin hide-scrollbar() {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+// animations
+@mixin arrow-translate {
+    @keyframes arrow-translate {
+        0% {
+            translate: 0 0;
+            opacity: 1;
+        }
+        45% {
+            translate: 100% 0;
+            opacity: 0;
+        }
+        55% {
+            translate: -100% 0;
+            opacity: 0;
+        }
+        100% {
+            translate: 0 0;
+            opacity: 1;
+        }
+    }
+}
