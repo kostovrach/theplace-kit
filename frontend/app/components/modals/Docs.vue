@@ -74,53 +74,102 @@
         width: 100%;
         max-width: rem(800);
         height: 100lvh;
+        color: $c-FFFFFF;
+        // background-color: $c-0C374B;
         overflow-y: auto;
         @include hide-scrollbar;
         &__container {
             display: flex;
             flex-direction: column;
-            padding: rem(32);
+            padding: rem(32) lineScale(32, 16, 480, 1920) lineScale(96, 128, 480, 1920)
+                lineScale(32, 16, 480, 1920);
         }
         &__button {
+            cursor: pointer;
             align-self: flex-end;
+            transition: rotate $td $tf-spring;
+            @media (pointer: fine) {
+                &:hover {
+                    rotate: 90deg;
+                }
+            }
         }
         &__titlebox {
             display: flex;
             flex-direction: column;
             gap: rem(32);
         }
-        &__title {}
-        &__tag {}
+        &__title {
+            font-size: lineScale(64, 32, 480, 1920);
+        }
+        &__tag {
+            font-size: lineScale(17, 15, 480, 1920);
+            color: $c-accent;
+            opacity: 0.7;
+        }
         &__body {
             margin-top: rem(64);
         }
         &__content {
             display: flex;
             flex-direction: column;
-            h2 {
-                font-size: lineScale(24, 18, 480, 1440);
-                margin: rem(32) 0 rem(8);
-            }
+            gap: rem(16);
+            font-size: lineScale(17, 15, 480, 1920);
+            line-height: 1.5;
+            h2,
             h3,
             h4,
             h5,
             h6 {
-                font-size: rem(16);
-                margin: rem(24) 0 rem(8);
+                scroll-margin: rem(128);
+                font-size: lineScale(32, 24, 480, 1920);
+                margin-top: rem(32);
             }
-
-            p {
-                font-size: rem(14);
-                line-height: 1.3;
-                margin: rem(16) 0 rem(8);
-                > a {
-                    text-decoration: underline;
-                    @media (pointer: fine) {
-                        &:hover {
-                            text-decoration: none;
-                        }
+            tr {
+                text-align-last: left;
+            }
+            th {
+                font-weight: normal;
+                font-size: lineScale(24, 18, 480, 1920);
+            }
+            ol > li,
+            ul > li {
+                margin-left: rem(20);
+            }
+            ol > li {
+                list-style: decimal outside;
+            }
+            ul > li {
+                list-style: disc outside;
+            }
+            img,
+            picture,
+            video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                margin-top: rem(32);
+            }
+            a {
+                text-decoration: underline;
+                color: $c-accent;
+                @media (pointer: fine) {
+                    &:hover {
+                        text-decoration: none;
                     }
                 }
+            }
+            hr {
+                width: 100%;
+                height: rem(1);
+                background: linear-gradient(
+                    90deg,
+                    transparent 0%,
+                    rgba($c-000000, 0.5) 10%,
+                    rgba($c-000000, 0.5) 90%,
+                    transparent 100%
+                );
+                margin: rem(16) 0;
             }
         }
     }

@@ -1,6 +1,4 @@
-import type { H3Event } from 'h3';
-
-export default eventHandler(async (event: H3Event) => {
+export default eventHandler(async (event) => {
     const API_URL = useRuntimeConfig().directus.url;
     const { id } = getRouterParams(event);
 

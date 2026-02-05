@@ -1,11 +1,23 @@
 <template>
-    <SvgIcon :name="type" :width="size" :height="size" :style="`color: ${color}`" />
+    <SvgIcon
+        :name="props.type"
+        :width="props.size"
+        :height="props.size"
+        :style="`color: ${props.color}`"
+    />
 </template>
 
 <script setup lang="ts">
-    defineProps({
-        type: { type: String, required: true },
-        size: { type: [Number, String], default: 24 },
-        color: { type: String, default: 'currentColor' },
-    });
+    const props = withDefaults(
+        defineProps<{
+            type?: string;
+            size?: number | string;
+            color?: string;
+        }>(),
+        {
+            type: 'arrow',
+            size: 24,
+            color: 'currentColor',
+        }
+    );
 </script>

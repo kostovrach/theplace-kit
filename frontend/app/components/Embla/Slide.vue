@@ -20,7 +20,7 @@
     @use '~/assets/scss/abstracts' as *;
 
     .embla__slide {
+        box-sizing: border-box;
         min-width: 0;
-        margin-right: lineScale(32, 14, 1024, 1440);
     }
 </style>

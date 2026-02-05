@@ -1,6 +1,6 @@
 services:
     postgres:
-        image: postgis/postgis:15-3.5 # При отсутсвии надобности пространственного раширения исполдьзовать postgres:15
+        image: postgis/postgis:16-3.6
         container_name: directus_postgres
         restart: unless-stopped
         environment:
@@ -30,9 +30,11 @@ services:
             DB_DATABASE: ${POSTGRES_DB}
             DB_USER: ${POSTGRES_USER}
             DB_PASSWORD: ${POSTGRES_PASSWORD}
+
             STORAGE_LOCATIONS: ${STORAGE_LOCATIONS}
             STORAGE_LOCAL_DRIVER: ${STORAGE_LOCAL_DRIVER}
             STORAGE_LOCAL_ROOT: ${STORAGE_LOCAL_ROOT}
+            
             CORS_ENABLED: ${CORS_ENABLED}
             CORS_ORIGIN: ${CORS_ORIGIN}
         volumes:

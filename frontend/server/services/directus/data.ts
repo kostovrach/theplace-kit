@@ -1,5 +1,5 @@
-import { directus, assetUrl } from './directus';
-import { readItems } from '@directus/sdk';
+import { directus, assetUrl } from './core';
+import { readItems, readItem } from '@directus/sdk';
 
 const FILE_NAMES = new Set<string>([
     'video',
@@ -163,6 +163,49 @@ export async function fetchCollection(
         return null;
     } catch (err) {
         console.error('[directusData] fetchCollection error', err);
+        throw err;
+    }
+}
+
+/**
+ * Возвращает объект или null
+ */
+export async function fetchItem(
+    collection: string,
+    id: string,
+    params: { fields?: any } = {},
+    opts: { force?: boolean; memoryTtl?: number; resolveFiles?: boolean } = {}
+): Promise<any> {
+    const fields = params.fields ?? ['*'];
+
+    const key = `item:${collection}:${id}:${JSON.stringify({ fields })}`;
+
+    const ttl = opts.memoryTtl ?? 60_000 * 5;
+
+    if (!opts.force) {
+        const cached = memGet(key, ttl);
+        if (cached !== null) return cached;
+    }
+
+    try {
+        const query: Record<string, any> = {};
+        if (fields) query.fields = fields;
+
+        const res = await directus.request(readItem(collection, id, query));
+
+        if (!res) {
+            memSet(key, null);
+            return null;
+        }
+
+        if (opts.resolveFiles !== false) {
+            addFileUrls(res);
+        }
+
+        memSet(key, res);
+        return res;
+    } catch (err) {
+        console.error('[directusData] fetchItem error', err);
         throw err;
     }
 }

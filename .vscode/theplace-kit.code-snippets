@@ -1,0 +1,354 @@
+{
+	// GLOBAL =============================================================
+	"comment arrow": {
+		"scope": "scss,javascript,typescript",
+		"prefix": "com|arrow",
+		"body": "// <----- $1",
+		"description": "Комментарий со указателем",
+	},
+
+	// VUE =============================================================
+	"studio-label": {
+		"scope": "vue,html",
+		"prefix": "studio-label",
+		"body": "<iframe src='//intheplace.ru/brand-iframe' width='100%' height='62' scrolling='yes' frameborder='0'></iframe>",
+		"description": "iframe бренда студии Кулагина",
+	},
+
+	"link-rel": {
+		"scope": "vue,html",
+		"prefix": "link-rel",
+		"body": "rel='noopener noreferrer'",
+		"description": "rel attr for links with target='_blank'",
+	},
+	
+	"picture": {
+		"scope": "vue,html",
+		"prefix": "pic",
+		"body": [
+			"<picture class=\"$1__image-container\">\n\t<img class=\"$1__image\" src=\"${2:img/fill-image.jpg}\" ${3|width,height|}=\"$4\" alt=\"$5\">\n</picture>"
+		],
+		"description": "Быстрый вызов тега picture"
+	},
+	
+	"component-props": {
+		"scope": "vue,typescript",
+		"prefix": "NUXT | component props",
+		"body": [
+			"const props = withDefaults(defineProps<{",
+			"\t$1",
+			"}>(), {",
+			"\t$2",
+			"});",
+			"$0"
+		]
+	},
+	
+	"Vfm-close-emit": {
+		"scope": "vue,typescript",
+		"prefix": "NUXT | vfm close emit",
+		"body": [
+			"const emit = defineEmits<{",
+        	"\t(e: 'close'): void;",
+    		"}>();"
+		]
+	},
+	
+	"vue-single-file": {
+		"prefix": "NUXT | Vbase setup",
+		"scope": "vue",
+		"body": [
+			"<template>",
+			"\t<NuxtLayout>",
+			"\t\t",
+			"\t</NuxtLayout>",
+			"</template>",
+			"",
+			"<script setup lang=\"ts\">",
+			"",
+			"</script>",
+			"",
+			"<style scoped lang=\"scss\">",
+			"\t@use '~/assets/scss/abstracts' as *;",
+			"\t",
+			"\t",
+			"</style>",
+		],
+		"description": "кастомный сетап однофайлового компонента vue",
+	},
+
+	"vue-final-modal-setup": {
+		"prefix": "NUXT | vfm file setup",
+		"scope": "vue",
+		"body": [
+			"<template>",
+			"\t<VueFinalModal",
+			"\t\toverlay-transition=\"vfm-fade\"",
+			"\t\tcontent-transition=\"vfm-fade\"",
+			"\t\tswipe-to-close=\"right\"",
+			"\t>",
+			"\t\t<div class=\"modal-$1\">",
+			"\t\t\t<div class=\"modal-$1__container\">",
+			"\t\t\t\t",
+			"\t\t\t</div>",
+			"\t\t</div>",
+			"\t</VueFinalModal>",
+			"</template>",
+			"",
+			"<script setup lang=\"ts\">",
+			"\timport { VueFinalModal } from 'vue-final-modal';",
+			"\t",
+			"\tconst emit = defineEmits<{",
+			"\t\t(e: 'close'): void;",
+			"\t}>();",
+			"</script>",
+			"",
+			"<style scoped lang=\"scss\">",
+			"\t@use '~/assets/scss/abstracts' as *;",
+			"\t",
+			"\t.modal-$1 {",
+			"\t\t&__container {",
+			"\t\t\t",
+			"\t\t}",
+			"\t}",
+			"</style>",
+		]
+	},
+
+	"page-seo": {
+		"scope": "vue,typescript,javascript",
+		"prefix": "seo",
+		"body": [
+			"// SEO & Meta ==================================================",
+			"const siteUrl = useRuntimeConfig().public.siteUrl;",
+			"useHead({",
+			"\ttitle: ${1:content}.value?.meta_title ?? '',",
+			"\tmeta: [",
+			"\t\t{ name: 'description', content: ${1:content}.value?.meta_description ?? '' },",
+			"\t\t{ name: 'robots', content: ${1:content}.value?.meta_robots ?? 'index, follow' },",
+			"\t\t{ name: 'keywords', content: ${1:content}.value?.meta_keywords ?? [] },",
+			"\t\t",
+			"\t\t{ property: 'og:title', content: ${1:content}.value?.meta_title ?? '' },",
+			"\t\t{ property: 'og:description', content: ${1:content}.value?.meta_description ?? '' },",
+			"\t\t{ property: 'og:type', content: ${1:content}.value?.og_type ?? 'website' },",
+			"\t\t{",
+			"\t\t\tproperty: 'og:image',",
+			"\t\t\tcontent: ${1:content}.value?.og_image",
+			"\t\t\t\t? `\\${siteUrl}/api/cms/assets/${${1:content}.value.og_image}`",
+			"\t\t\t\t: '',",
+			"\t\t}",
+			"\t\t{ property: 'og:url', content: useRequestURL().href },",
+			"\t\t",
+			"\t\t{ name: 'twitter:card', content: 'summary_large_image' },",
+			"\t\t{ name: 'twitter:title', content: ${1:content}.value?.meta_title ?? '' },",
+			"\t],",
+			"});",
+			"",
+			"if (${1:content}.value?.shema_markup) {",
+			"\tuseHead({",
+			"\t\tscript: [",
+			"\t\t\t{",
+			"\t\t\t\ttype: 'application/ld+json',",
+			"\t\t\t\tinnerHTML: ${1:content}.value.shema_markup || {},",
+			"\t\t\t}",
+			"\t\t],",
+			"\t});",
+			"};",
+		],
+		"description": "SEO конфигурация страницы"
+	},
+
+	// TS =============================================================
+	"replace-spaces": {
+		"scope": "vue,typescript",
+		"prefix": "replace-spaces",
+		"body": "$0.trim().replace(\/\\s+/g, '')",
+		"description": "Удаление пробелов в строке RegExp",
+	},
+	
+	"content-interface": {
+		"scope": "vue,typescript",
+		"prefix": "TS | content interface",
+		"body": [
+			"interface ${1:IPage} {",
+			"\tid: string | number;",
+			"\tdate_created: string;",
+			"\tdate_updated: string | null;",
+			"\t$0",
+			"}"
+		],
+		"description": "Часто используемый тип интерфейса при работе с cms",
+	},
+
+	// CSS / SCSS =======================================================
+	"scss-abstracts": {
+		"scope": "vue,css,scss",
+		"prefix": "NUXT | abstracts",
+		"body": "@use '~/assets/scss/abstracts' as *;",
+		"description": "scss abstracts in nuxt app",
+	},
+	
+	"rem": {
+		"scope": "vue,css,scss",
+		"prefix": "rem",
+		"body": [
+			"rem($0)"
+		],
+		"description": "rem func"
+	},
+	
+	"hv": {
+		"scope": "vue,css,scss",
+		"prefix": "hv",
+		"body": [
+			"@media (pointer: fine){\n\t&:hover{\n\t\t$0\n\t}\n}"
+		],
+		"description": "Обычный hover"
+	},
+
+	"hhv": {
+		"scope": "vue,css,scss",
+		"prefix": "hhv",
+		"body": [
+			"@media (pointer: fine) {\n\t$0\n}"
+		],
+		"description": "Hover без анимации на мобильных устройствах"
+	},
+
+	"g": {
+		"scope": "vue,css,scss",
+		"prefix": "g",
+		"body": [
+			"gap: rem($1);"
+		],
+		"description": "Отступы между элементами (одинарный)"
+	},
+
+	"gg": {
+		"scope": "vue,css,scss",
+		"prefix": "gg",
+		"body": [
+			"gap: rem(${1:0}) rem(${2:0});"
+		],
+		"description": "Отступы между элементами (двойной)"
+	},
+	
+	"md": {
+		"scope": "vue,css,scss",
+		"prefix": "md",
+		"body": [
+			"@media (max-width: $1px){\n\t$2\n}"
+		],
+		"description": "Медиа под произвольный размер экрана"
+	},
+	
+	"cc": {
+		"scope": "vue,css,scss",
+		"prefix": "cc",
+		"body": [
+			"#{\\$p}$1"
+		],
+		"description": "Ссылка на стиль в модификаторе"
+	},
+
+	"ccc": {
+		"scope": "vue,css,scss",
+		"prefix": "ccc",
+		"body": [
+			"\\$p: &;"
+		],
+		"description": "Стиль в модификаторе"
+	},
+	
+	"b": {
+		"scope": "vue,css,scss",
+		"prefix": "b",
+		"body": [
+			"&::before{\n\tcontent:'';\n\t$0\n}"
+		],
+		"description": "Псевдоэлемент до"
+	},
+
+	"a": {
+		"scope": "vue,css,scss",
+		"prefix": "a",
+		"body": [
+			"&::after{\n\tcontent:'';\n\t$0\n}"
+		],
+		"description": "Псевдоэлемент после"
+	},
+	
+	"count": {
+		"scope": "vue,css,scss",
+		"prefix": "count",
+		"body": [
+			"counter-reset: item;\ncounter-increment: item;\ncontent: counter(item);"
+		],
+		"description": "Count псевдо-счетчик"
+	},
+	
+	"wfc": {
+		"scope": "vue,css,scss",
+		"prefix": "wfc",
+		"body": [
+			"width: fit-content;"
+		],
+		"description": "width: fit-content"
+	},
+	
+	"text-balance": {
+		"scope": "vue,css,scss",
+		"prefix": "twb",
+		"body": [
+			"text-wrap: balance;"
+		],
+		"description": "text wrap balance"
+	},
+	
+	"ta": {
+		"scope": "vue,css,scss",
+		"prefix": "ta",
+		"body": [
+			"transition: ${1:all} ${2:\\$td} ${3:\\$tf} 0s;"
+		],
+		"description": "Transition"
+	},
+	
+	"br5": {
+		"scope": "vue,css,scss",
+		"prefix": "br5",
+		"body": [
+			"border-radius: 50%;"
+		],
+		"description": "Закругление на 50%"
+	},
+	
+	"pointer-events": {
+		"scope": "vue,css,scss",
+		"prefix": "poi",
+		"body": [
+			"pointer-events: ${1:none};"
+		],
+		"description": "css pointer-events"
+	},
+	
+	"lineClamp mixin": {
+		"scope": "vue,css,scss",
+		"prefix": "MIX | lineClamp",
+		"body": [
+			"@include lineClamp($1);"
+		],
+		"description": "Быстрый вызов lineClamp миксина"
+	},
+	
+	"line-scale": {
+		"scope": "vue,css,scss",
+		"prefix": "ls",
+		"body": [
+			"lineScale($1,$2,${3:480},${4:1920})"
+		],
+		"description": "scss line scale function. Динамическое свойство"
+	},
+	
+	
+}

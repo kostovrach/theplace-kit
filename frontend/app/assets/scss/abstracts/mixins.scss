@@ -3,7 +3,7 @@
 @use './variables' as *;
 
 // layout
-@mixin content-container($max-width: rem(1920), $padding: 0 $px) {
+@mixin content-container($max-width: rem(1920), $padding: 0 rem(16)) {
     max-width: $max-width;
     margin: 0 auto;
     padding: $padding;
@@ -14,14 +14,14 @@
 }
 
 // components
-
 @mixin skeleton(
-    $color: $skeleton-color,
-    $anim-color: linear-gradient(90deg, transparent, rgba(#ffffff, 0.4), transparent)
+    $color: #e2e8f0,
+    $anim-color: linear-gradient(90deg, transparent, rgba(#ffffff, 0.4), transparent),
+    $height: 100%
 ) {
     position: relative;
     width: 100%;
-    height: 100%;
+    height: $height;
     box-sizing: border-box;
     background-color: $color;
     border-radius: rem(8);
@@ -45,24 +45,143 @@
     }
 }
 
-@mixin checkbox($size: rem(24), $accent-color: $c-000000, $contrast-color: $c-FFFFFF) {
+@mixin searchbar() {
+    position: relative;
+    width: 100%;
+    max-width: rem(640);
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: rem(2);
+        background-image: linear-gradient(90deg, $c-accent 50%, $c-000000 50%);
+        background-size: 200% 100%;
+        background-position: 100% 0;
+        transition: background-position $td $tf;
+    }
+    &:has(input:focus),
+    &:not(:has(input:placeholder-shown)) {
+        &::before {
+            background-position: 0;
+        }
+        > span:has(svg) {
+            color: $c-accent;
+        }
+    }
+    @media (pointer: fine) {
+        &:hover {
+            > input {
+                &::placeholder {
+                    opacity: 0.5;
+                }
+            }
+        }
+    }
+    > input {
+        width: 100%;
+        font-family: inherit;
+        color: inherit;
+        font-size: lineScale(18, 16, 480, 1920);
+        font-weight: $fw-semi;
+        padding: rem(20) rem(48) rem(20) 0;
+        background-color: transparent;
+        &::placeholder {
+            color: inherit;
+            opacity: 0.25;
+            transition: opacity $td $tf;
+        }
+    }
+    > span:has(svg) {
+        position: absolute;
+        top: 50%;
+        right: rem(16);
+        translate: 0 -50%;
+        pointer-events: none;
+        transition: color $td $tf;
+    }
+}
+
+@mixin text-content(
+    $font-size: lineScale(17, 15, 480, 1920),
+    $h-size: lineScale(24, 20, 480, 1920),
+    $h2-size: lineScale(32, 24, 480, 1920)
+) {
+    display: flex;
+    flex-direction: column;
+    gap: rem(16);
+    font-size: $font-size;
+    line-height: 1.5;
+    h2 {
+        font-weight: $fw-semi;
+        font-size: $h2-size;
+    }
+    h3,
+    h4,
+    h5,
+    h6 {
+        scroll-margin: rem(128);
+        font-size: $h-size;
+        margin-top: rem(32);
+    }
+    tr {
+        text-align-last: left;
+    }
+    th {
+        font-weight: normal;
+        font-size: lineScale(24, 18, 480, 1920);
+    }
+    ol > li,
+    ul > li {
+        margin-left: rem(20);
+    }
+    ol > li {
+        list-style: decimal outside;
+    }
+    ul > li {
+        list-style: disc outside;
+    }
+    img,
+    picture,
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        margin-top: rem(32);
+    }
+    a {
+        text-decoration: underline;
+        color: $c-accent;
+        @media (pointer: fine) {
+            &:hover {
+                text-decoration: none;
+            }
+        }
+    }
+    hr {
+        width: 100%;
+        height: rem(1);
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba($c-000000, 0.5) 10%,
+            rgba($c-000000, 0.5) 90%,
+            transparent 100%
+        );
+        margin: rem(16) 0;
+    }
+}
+
+@mixin checkbox($color: $c-accent, $size: rem(24)) {
     cursor: pointer;
     position: relative;
     width: $size;
+    min-width: $size;
     height: $size;
-    aspect-ratio: 1/1;
-    border: rem(1) solid $accent-color;
-    > input[type='checkbox'] {
-        cursor: pointer;
-        position: absolute;
-        z-index: 1;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        appearance: none;
-        -moz-appearance: none;
-        -webkit-appearance: none;
-    }
+    min-height: $size;
+    aspect-ratio: 1;
+    border: rem(2) solid $color;
     &::before,
     &::after {
         content: '';
@@ -70,41 +189,37 @@
         top: 50%;
         left: 50%;
         translate: -50% -50%;
-        width: rem(14);
+        width: rem(12);
         height: rem(2);
-        opacity: 0;
-        transition: all calc($td / 2) $tf;
-        pointer-events: none;
+        background-color: $color;
+        opacity: 0.25;
+        transition: all $td $tf-spring 0s;
     }
     @media (pointer: fine) {
         &:hover {
             &::before,
             &::after {
-                background-color: $accent-color;
                 opacity: 1;
             }
-            &::before {
-                rotate: 90deg;
+            &::after {
+                rotate: 270deg;
             }
         }
     }
     &:has(input:checked) {
-        background-color: $accent-color;
         &::before,
         &::after {
-            background-color: $contrast-color;
             opacity: 1;
         }
         &::before {
-            left: 63%;
-            width: rem(12);
-            rotate: 135deg;
+            width: rem(6);
+            rotate: -135deg;
+            translate: -100% 0;
         }
         &::after {
-            left: 30%;
-            top: 60%;
             width: rem(10);
-            rotate: -135deg;
+            rotate: 135deg;
+            translate: -30% -30%;
         }
     }
 }
@@ -185,6 +300,47 @@
                 background-color: $anim-color;
             }
         }
+    }
+}
+
+@mixin hover-circle-left(
+    $color: $c-accent,
+    $circle-size: rem(5),
+    $transition: (
+        color $td $tf,
+        translate $td $tf,
+    )
+) {
+    position: relative;
+    @media (pointer: fine) {
+        &:hover,
+        &:focus {
+            > span {
+                color: $color;
+                translate: calc($circle-size + rem(4)) 0;
+            }
+            &::before {
+                width: $circle-size;
+            }
+        }
+    }
+    > span {
+        display: block;
+        transition: $transition;
+    }
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        translate: 0 -50%;
+        width: 0;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background-color: $color;
+        will-change: width;
+        transition: width $td $tf;
+        transform-origin: center;
     }
 }
 
