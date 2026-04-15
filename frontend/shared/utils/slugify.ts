@@ -1,3 +1,11 @@
+/**
+ * Генерация URL-friendly slug из строки
+ *
+ * Преобразует текст в латиницу, удаляет спецсимволы и приводит к формату slug
+ *
+ * @param text - исходный текст (string | number)
+ * @returns slug-строка
+ */
 export function slugify(text: string | number): string {
     const translitMap: Record<string, string> = {
         а: 'a',

@@ -12,6 +12,7 @@ export async function useCms<T = any>(
     withRelations: string[] = [],
     requestOpt?: AsyncDataOptions<{ data: T }>,
     opts: {
+        /** @deprecated */
         resolveFiles?: boolean;
         force?: boolean;
         key?: string;

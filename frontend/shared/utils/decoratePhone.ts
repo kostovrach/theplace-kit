@@ -1,3 +1,11 @@
+/**
+ * Форматирование номера телефона в российский формат
+ *
+ * Приводит номер к виду: +7 (999) 999-99-99
+ *
+ * @param phone - номер телефона (string | number)
+ * @returns отформатированный номер или исходная строка, если формат некорректный
+ */
 export function decoratePhone(phone: string | number): string {
     const raw = phone.toString();
 

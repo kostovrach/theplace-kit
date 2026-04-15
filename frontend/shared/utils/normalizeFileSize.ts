@@ -1,5 +1,12 @@
 type FileSizeBase = 'SI' | 'IEC';
 
+/**
+ * Нормализация размера файла (байты в человеко-читаемый формат)
+ *
+ * @param raw - размер файла в байтах (string | number)
+ * @param base - система измерения: SI (1000) или IEC (1024)
+ * @returns строка с форматированным размером (вида 1.2 MB)
+ */
 export function normalizeFileSize(raw: string | number, base: FileSizeBase = 'SI'): string {
     const bytes = Number(raw);
     if (!Number.isFinite(bytes) || bytes <= 0) return '0 kB';
