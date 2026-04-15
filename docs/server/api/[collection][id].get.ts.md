@@ -41,7 +41,6 @@
 
 - `fields`
 - `relations`
-- `resolveFiles`
 - `force`
 
 ---
@@ -62,13 +61,6 @@
 
 CSV строка:
 `author.*,images.*,category.*`
-
----
-
-## resolveFiles
-
-- `true` по умолчанию
-- `false` только если `resolveFiles=false`
 
 ---
 
@@ -103,19 +95,6 @@ options:
 ## Fetch
 
 `fetchItem(collection, id, params, options)`
-
----
-
-## Кэширование
-
-- maxAge: 300 секунд (5 минут)
-- cached handler Nuxt
-
-Кэш зависит от:
-
-- `collection`
-- `id`
-- query params
 
 ---
 

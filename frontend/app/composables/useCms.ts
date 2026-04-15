@@ -12,8 +12,6 @@ export async function useCms<T = any>(
     withRelations: string[] = [],
     requestOpt?: AsyncDataOptions<{ data: T }>,
     opts: {
-        /** @deprecated */
-        resolveFiles?: boolean;
         force?: boolean;
         key?: string;
         cacheTtl?: number;
@@ -26,7 +24,6 @@ export async function useCms<T = any>(
 
     const query: Record<string, any> = {
         relations: withRelations.join(','),
-        resolveFiles: opts.resolveFiles ?? true,
     };
 
     if (opts.query) {

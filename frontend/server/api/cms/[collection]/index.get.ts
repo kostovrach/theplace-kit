@@ -1,4 +1,4 @@
-import { fetchCollection } from '~~/server/services/directus/data';
+import { fetchCollection } from '../../../services/directus/data';
 
 export default defineCachedEventHandler(
     async (event) => {
@@ -49,22 +49,19 @@ export default defineCachedEventHandler(
             }
 
             const sort = q.sort ? String(q.sort) : undefined;
-            const limit = q.limit !== undefined ? Number(q.limit) : undefined;
-            const resolveFiles =
-                q.resolveFiles !== undefined ? String(q.resolveFiles) !== 'false' : true;
-            const force = q.force === '1' || q.force === 'true';
+            const limit = q.limit !== undefined ? Number(q.limit) : -1;
 
-            const opts = { resolveFiles, force, memoryTtl: undefined as number | undefined };
             const params = { fields: fields ?? ['*', ...(relations ?? [])], filter, sort, limit };
 
-            const data = await fetchCollection(collection, params, opts);
+            const data = await fetchCollection(collection, params);
 
             return { data };
         } catch (err: any) {
             console.error('[api/cms] error', err);
+
             event.node.res.statusCode = 500;
             return { data: null, error: String(err?.message || err) };
         }
     },
-    { maxAge: 300 }
+    { maxAge: 60 * 5 }
 );

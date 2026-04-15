@@ -27,8 +27,6 @@
 - `filter`
 - `sort`
 - `limit`
-- `resolveFiles`
-- `force`
 
 Форматы:
 
@@ -85,22 +83,6 @@ JSON строка > объект
 
 ---
 
-### 8. resolveFiles
-
-По умолчанию: `true`  
-`false` только если `resolveFiles=false`
-
----
-
-### 9. force
-
-true если:
-
-- `force=1`
-- `force=true`
-
----
-
 ## Формирование запроса
 
 ```
@@ -113,30 +95,11 @@ params:
 }
 ```
 
-```
-opts:
-{
-  resolveFiles,
-  force,
-  memoryTtl: undefined
-}
-```
-
 ---
 
 ## Получение данных
 
 `fetchCollection(collection, params, opts)`
-
----
-
-## Кэширование
-
-- maxAge: 300 секунд (5 минут)
-- ключ зависит от:
-    - `collection`
-    - `query params`
-    - URL
 
 ---
 
@@ -177,7 +140,6 @@ opts:
 ## Особенности
 
 - универсальный CMS endpoint
-- SSR caching через Nuxt
 - система query параметров
 - совместим с useCms / useCmsItem
 - безопасный JSON parsing

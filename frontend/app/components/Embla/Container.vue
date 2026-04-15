@@ -28,6 +28,7 @@
     import Autoplay from 'embla-carousel-autoplay';
     import Fade from 'embla-carousel-fade';
     import AutoHeight from 'embla-carousel-auto-height';
+    import WheelGestures from 'embla-carousel-wheel-gestures';
     import AutoScroll, { type AutoScrollOptionsType } from 'embla-carousel-auto-scroll';
     import type { AutoplayOptionsType } from 'embla-carousel-autoplay';
     import type { EmblaOptionsType, EmblaPluginType } from 'embla-carousel';
@@ -85,6 +86,8 @@
 
     // Methods ===================================================
     function setPlugins() {
+        plugins.push(WheelGestures());
+
         if (props.autoplay) {
             plugins.push(
                 Autoplay({

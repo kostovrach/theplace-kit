@@ -1,4 +1,4 @@
-import { fetchItem } from '~~/server/services/directus/data';
+import { fetchItem } from '../../../services/directus/data';
 
 export default defineCachedEventHandler(
     async (event) => {
@@ -43,18 +43,9 @@ export default defineCachedEventHandler(
             }
 
             // options
-            const resolveFiles =
-                q.resolveFiles !== undefined ? String(q.resolveFiles) !== 'false' : true;
-            const force = q.force === '1' || q.force === 'true';
-
-            const data = await fetchItem(
-                collection,
-                id,
-                {
-                    fields: fields ?? ['*', ...(relations ?? [])],
-                },
-                { resolveFiles, force }
-            );
+            const data = await fetchItem(collection, id, {
+                fields: fields ?? ['*', ...(relations ?? [])],
+            });
 
             return { data };
         } catch (err: any) {
@@ -64,6 +55,6 @@ export default defineCachedEventHandler(
         }
     },
     {
-        maxAge: 300,
+        maxAge: 60 * 5,
     }
 );
