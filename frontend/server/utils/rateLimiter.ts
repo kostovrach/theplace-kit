@@ -8,6 +8,7 @@ const store: RateLimitStore = {};
 
 export function rateLimiter(event: H3Event<EventHandlerRequest>, limit = 5, windowMs = 60_000) {
     const ip = getRequestHeader(event, 'x-forwarded-for') || event.node.req.socket.remoteAddress;
+    if (!ip) return false;
     const now = Date.now();
 
     if (!store[ip] || store[ip].expires < now) {

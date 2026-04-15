@@ -4,7 +4,9 @@
         class="embla"
         :style="{ overflow: props.overflow }"
         @mouseenter="mouseEnterHandler"
+        @touchstart="mouseEnterHandler"
         @mouseleave="mouseLeaveHandler"
+        @touchend="mouseLeaveHandler"
     >
         <div
             class="embla__container"
@@ -13,6 +15,7 @@
                 flexDirection: props.axis === 'x' ? 'row' : 'column',
                 gap: `${props.spaceBetween}px`,
                 height: props.axis === 'y' ? '100%' : 'fit-content',
+                touchAction: props.axis === 'x' ? 'pan-x pinch-zoom' : 'pan-y pinch-zoom',
             }"
         >
             <slot></slot>
@@ -107,10 +110,16 @@
         if (props.autoScroll && props.stopScrollOnHover) {
             emblaApi.value?.plugins().autoScroll.stop();
         }
+        if (props.autoplay && props.stopScrollOnHover) {
+            emblaApi.value?.plugins().autoplay.stop();
+        }
     }
     function mouseLeaveHandler() {
         if (props.autoScroll && props.stopScrollOnHover) {
             emblaApi.value?.plugins().autoScroll.play();
+        }
+        if (props.autoplay && props.stopScrollOnHover) {
+            emblaApi.value?.plugins().autoplay.play();
         }
     }
     // ===========================================================
@@ -126,7 +135,7 @@
 <style scoped lang="scss">
     .embla {
         user-select: none;
-        max-width: 100%;
+        width: 100%;
         &__container {
             display: flex;
         }

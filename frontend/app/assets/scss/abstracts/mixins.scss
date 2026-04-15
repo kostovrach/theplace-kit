@@ -3,13 +3,13 @@
 @use './variables' as *;
 
 // layout
-@mixin content-container($max-width: rem(1920), $padding: 0 rem(16)) {
+@mixin content-container($max-width: rem(1920), $padding: 0 lineScale(32, 16, 480, 1920)) {
     max-width: $max-width;
     margin: 0 auto;
     padding: $padding;
 }
 
-@mixin content-block($margin: rem(128)) {
+@mixin content-block($margin: lineScale(128, 96, 480, 1920)) {
     margin: $margin 0;
 }
 
@@ -173,7 +173,10 @@
     }
 }
 
-@mixin checkbox($color: $c-accent, $size: rem(24)) {
+@mixin checkbox() {
+    $color: $c-accent;
+    $size: rem(24);
+
     cursor: pointer;
     position: relative;
     width: $size;
@@ -181,7 +184,8 @@
     height: $size;
     min-height: $size;
     aspect-ratio: 1;
-    border: rem(2) solid $color;
+    border: rem(2) solid $c-998D8D;
+    transition: border-color $td $tf;
     &::before,
     &::after {
         content: '';
@@ -191,25 +195,40 @@
         translate: -50% -50%;
         width: rem(12);
         height: rem(2);
-        background-color: $color;
+        background-color: $c-998D8D;
         opacity: 0.25;
-        transition: all $td $tf-spring 0s;
+        transition: all calc($td * 2) $tf-spring 0s;
     }
     @media (pointer: fine) {
         &:hover {
+            border-color: $color;
             &::before,
             &::after {
                 opacity: 1;
+                background-color: $color;
             }
             &::after {
                 rotate: 270deg;
             }
         }
     }
-    &:has(input:checked) {
+    &:has(input:focus-visible) {
+        border-color: $color;
         &::before,
         &::after {
             opacity: 1;
+            background-color: $color;
+        }
+        &::after {
+            rotate: 270deg;
+        }
+    }
+    &:has(input:checked) {
+        border-color: $color;
+        &::before,
+        &::after {
+            opacity: 1;
+            background-color: $color;
         }
         &::before {
             width: rem(6);

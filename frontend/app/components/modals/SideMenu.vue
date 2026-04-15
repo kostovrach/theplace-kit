@@ -8,7 +8,7 @@
             <div class="modal-menu__container">
                 <div class="modal-menu__header">
                     <button class="modal-menu__button" type="button" @click="emit('close')">
-                        <SvgSprite type="cross" :size="32" />
+                        <SvgSprite type="common-cross" :size="32" />
                     </button>
                 </div>
             </div>

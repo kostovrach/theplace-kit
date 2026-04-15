@@ -7,7 +7,7 @@
         <div class="modal-docs">
             <div class="modal-docs__container">
                 <button class="modal-docs__button" type="button" @click="emit('close')">
-                    <SvgSprite type="cross" :size="32" />
+                    <SvgSprite type="common-cross" :size="32" />
                 </button>
                 <div class="modal-docs__titlebox">
                     <h1 class="modal-docs__title">{{ props.title }}</h1>
@@ -75,19 +75,19 @@
         max-width: rem(800);
         height: 100lvh;
         color: $c-FFFFFF;
-        // background-color: $c-0C374B;
+        background-color: $c-secondary;
         overflow-y: auto;
         @include hide-scrollbar;
         &__container {
             display: flex;
             flex-direction: column;
-            padding: rem(32) lineScale(32, 16, 480, 1920) lineScale(96, 128, 480, 1920)
-                lineScale(32, 16, 480, 1920);
+            padding: rem(32) 0 lineScale(96, 128, 480, 1920);
         }
         &__button {
             cursor: pointer;
             align-self: flex-end;
             transition: rotate $td $tf-spring;
+            margin-right: lineScale(64, 16, 480, 1920);
             @media (pointer: fine) {
                 &:hover {
                     rotate: 90deg;
@@ -95,20 +95,34 @@
             }
         }
         &__titlebox {
+            position: relative;
             display: flex;
             flex-direction: column;
             gap: rem(32);
+            padding: 0 lineScale(64, 16, 480, 1920);
+            &::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: lineScale(16, 2, 480, 1920);
+                height: rem(128);
+                background-color: $c-accent;
+                pointer-events: none;
+            }
         }
         &__title {
             font-size: lineScale(64, 32, 480, 1920);
+            font-weight: $fw-semi;
         }
         &__tag {
             font-size: lineScale(17, 15, 480, 1920);
             color: $c-accent;
-            opacity: 0.7;
+            opacity: 0.5;
         }
         &__body {
             margin-top: rem(64);
+            padding: 0 lineScale(64, 16, 480, 1920);
         }
         &__content {
             display: flex;
@@ -124,6 +138,7 @@
                 scroll-margin: rem(128);
                 font-size: lineScale(32, 24, 480, 1920);
                 margin-top: rem(32);
+                font-weight: $fw-semi;
             }
             tr {
                 text-align-last: left;

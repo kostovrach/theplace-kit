@@ -1,6 +1,6 @@
 services:
     postgres:
-        image: postgis/postgis:16-3.6
+        image: postgis/postgis:16-3.5
         container_name: directus_postgres
         restart: unless-stopped
         environment:
@@ -31,10 +31,22 @@ services:
             DB_USER: ${POSTGRES_USER}
             DB_PASSWORD: ${POSTGRES_PASSWORD}
 
+            # Раскомментировать для подключения s3
+
+            # STORAGE_LOCATIONS: ${STORAGE_LOCATIONS}
+            # STORAGE_S3_DRIVER: ${STORAGE_S3_DRIVER}
+            # STORAGE_S3_KEY: ${STORAGE_S3_KEY}
+            # STORAGE_S3_SECRET: ${STORAGE_S3_SECRET}
+            # STORAGE_S3_BUCKET: ${STORAGE_S3_BUCKET}
+            # STORAGE_S3_ENDPOINT: ${STORAGE_S3_ENDPOINT}
+            # STORAGE_S3_REGION: ${STORAGE_S3_REGION}
+            # STORAGE_S3_ROOT: ${STORAGE_S3_ROOT}
+
+            # Закомментировать для подключения s3
             STORAGE_LOCATIONS: ${STORAGE_LOCATIONS}
             STORAGE_LOCAL_DRIVER: ${STORAGE_LOCAL_DRIVER}
             STORAGE_LOCAL_ROOT: ${STORAGE_LOCAL_ROOT}
-            
+
             CORS_ENABLED: ${CORS_ENABLED}
             CORS_ORIGIN: ${CORS_ORIGIN}
         volumes:

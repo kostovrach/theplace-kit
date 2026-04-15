@@ -47,7 +47,7 @@ export default defineEventHandler(
         }
 
         try {
-            const body = await readBody<{}>(event);
+            const body = await readBody<{ email?: string; phone?: string }>(event);
             if (!body) {
                 return { status: 400, success: false, message: 'В запросе отсутсвуют данные' };
             }

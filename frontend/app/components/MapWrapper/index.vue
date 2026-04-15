@@ -3,7 +3,6 @@
         <YandexMap
             class="map"
             @click="markersIdx = null"
-            @mouseleave="markersIdx = null"
             :settings="{
                 location: {
                     center: props.center,
@@ -14,11 +13,11 @@
         >
             <YandexMapDefaultSchemeLayer />
             <YandexMapDefaultFeaturesLayer />
-            <YandexMapControls :settings="{ position: 'right' }">
+            <YandexMapControls v-if="props.controls" :settings="{ position: 'right' }">
                 <YandexMapZoomControl />
                 <YandexMapGeolocationControl />
             </YandexMapControls>
-            <YandexMapControls :settings="{ position: 'left top' }">
+            <YandexMapControls v-if="props.controls" :settings="{ position: 'left top' }">
                 <YandexMapOpenMapsButton />
             </YandexMapControls>
             <YandexMapUiMarker
@@ -27,7 +26,7 @@
                 :settings="{
                     onClick: () => (markersIdx === idx ? (markersIdx = null) : (markersIdx = idx)),
                     coordinates: marker.point.coordinates,
-                    color: 'blue',
+                    color: 'red',
                     popup: { show: markersIdx === idx, position: 'bottom right', offset: 10 },
                 }"
             >
@@ -79,12 +78,14 @@
             theme?: 'light' | 'dark';
             center?: LngLat;
             zoom?: number;
+            controls?: boolean;
         }>(),
         {
             markers: () => [],
             center: () => [50.18, 53.22],
             zoom: 8,
             theme: 'light',
+            controls: false,
         }
     );
 
@@ -100,7 +101,7 @@
         &__marker {
             &-title {
                 font-size: rem(15);
-                font-weight: $fw-bold;
+                font-weight: $fw-semi;
             }
             &-subtitle {
                 font-size: rem(13);

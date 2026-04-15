@@ -1,17 +1,33 @@
 <template>
-    <div class="slider-navigation">
+    <div
+        :class="['slider-navigation', `slider-navigation--${props.direction}`]"
+        :style="{
+            width: props.direction === 'horizontal' ? props.size : 'fit-content',
+            height: props.direction === 'vertical' ? props.size : 'fit-content',
+        }"
+        @mouseenter="mouseenterHandler"
+        @mouseleave="mouseleaveHandler"
+        @touchstart="mouseenterHandler"
+        @touchend="mouseleaveHandler"
+    >
         <button
             class="slider-navigation__button slider-navigation__button--prev"
             type="button"
             @click="scrollPrev"
             :disabled="!canScrollPrev"
         >
-            <SvgSprite type="arrow" :size="20" />
+            <SvgSprite type="common-chevron" :size="20" />
         </button>
-        <div class="slider-navigation__pagination">
-            <span class="slider-navigation__pagination-current">{{ selectedSnap }}</span>
-            <span class="slider-navigation__pagination-separator"></span>
-            <span class="slider-navigation__pagination-total">{{ snapCount }}</span>
+
+        <div v-if="props.pagination" class="slider-navigation__pagination">
+            <span
+                v-for="n in snapCount"
+                :key="n"
+                :class="[
+                    'slider-navigation__pagination-bullet',
+                    { 'slider-navigation__pagination-bullet--active': n === selectedSnap },
+                ]"
+            ></span>
         </div>
 
         <button
@@ -20,7 +36,7 @@
             @click="scrollNext"
             :disabled="!canScrollNext"
         >
-            <SvgSprite type="arrow" :size="20" />
+            <SvgSprite type="common-chevron" :size="20" />
         </button>
     </div>
 </template>
@@ -30,14 +46,32 @@
 
     const props = withDefaults(
         defineProps<{
+            size?: 'fit-content' | '100%' | 'auto';
+            direction?: 'horizontal' | 'vertical';
+            pagination?: boolean;
             sliderRef: ComputedRef<{ emblaApi: EmblaCarouselType | null } | null> | null;
         }>(),
         {
+            size: 'fit-content',
             sliderRef: null,
+            pagination: false,
+            direction: 'horizontal',
         }
     );
 
     const emblaApi = computed(() => props.sliderRef?.value?.emblaApi);
+
+    function mouseenterHandler() {
+        if (emblaApi.value?.plugins().autoplay) {
+            emblaApi.value?.plugins().autoplay.stop();
+        }
+    }
+
+    function mouseleaveHandler() {
+        if (emblaApi.value?.plugins().autoplay) {
+            emblaApi.value?.plugins().autoplay.play();
+        }
+    }
 
     // controls =======================================================
     const scrollPrev = () => {
@@ -77,55 +111,80 @@
     @use '~/assets/scss/abstracts' as *;
 
     .slider-navigation {
+        $p: &;
+
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: rem(32);
-        color: $c-secondary;
         font-weight: $fw-semi;
+        &--vertical {
+            flex-direction: column;
+        }
         &__button {
             cursor: pointer;
             width: rem(56);
+            color: currentColor;
             aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
+            rotate: 90deg;
 
-            background-image: linear-gradient(to right, $c-accent 35%, $c-secondary 60%);
-            background-size: 250%;
-            background-repeat: no-repeat;
-            background-position: 100%;
             transition:
                 background-position $td $tf,
                 color $td $tf,
                 scale $td $tf;
             @media (pointer: fine) {
                 &:hover {
-                    color: $c-FFFFFF;
-                    background-position: 0 0;
+                    color: $c-accent;
                 }
+            }
+            &:focus-visible {
+                color: $c-accent;
+            }
+            @at-root #{$p}--vertical & {
+                rotate: 180deg;
             }
             &:disabled {
                 pointer-events: none;
                 opacity: 0.5;
             }
             &:active {
-                color: $c-FFFFFF;
-                background-image: linear-gradient(to top, $c-secondary);
-                scale: 0.95;
+                scale: 0.8;
             }
-            &--prev {
-                transform: scaleX(-1);
+            &--next {
+                transform: scaleY(-1);
             }
         }
         &__pagination {
             display: flex;
             align-items: center;
             gap: rem(6);
-            &-separator {
+            @at-root #{$p}--vertical & {
+                flex-direction: column;
+            }
+            &-bullet {
                 width: rem(16);
-                height: rem(2);
-                background-color: currentColor;
+                min-width: rem(16);
+                height: rem(3);
+                border-radius: rem(8);
+                background-color: $c-secondary;
+                opacity: 0.25;
+                transition:
+                    scale $td $tf,
+                    opacity $td $tf;
+                will-change: scale, opacity;
+                @at-root #{$p}--vertical & {
+                    width: rem(3);
+                    min-width: rem(2);
+                    height: rem(16);
+                }
+                &--active {
+                    background-color: $c-secondary;
+                    scale: 1.2;
+                    opacity: 1;
+                }
             }
         }
     }

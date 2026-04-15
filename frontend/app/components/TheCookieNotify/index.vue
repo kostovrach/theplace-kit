@@ -2,7 +2,7 @@
     <div id="cookie" class="cookie-notify" v-if="isShowNotify">
         <div class="cookie-notify__container">
             <div class="cookie-notify__title">
-                <SvgSprite type="cookie" :size="22" />
+                <SvgSprite type="common-cookie" :size="22" />
                 <span>Мы&nbsp;используем файлы cookie</span>
             </div>
 
@@ -11,8 +11,8 @@
                 персональных данных с&nbsp;помощью сервисов веб-аналитики.
             </div>
 
-            <button class="cookie-notify__button" type="button" @click="setAgreement">
-                <span>Принять</span>
+            <button is="button" chip class="cookie-notify__button" @click="setAgreement">
+                Принять
             </button>
         </div>
     </div>
@@ -44,7 +44,7 @@
         position: fixed;
         z-index: 10;
         left: lineScale(16, 8, 480, 1920);
-        bottom: lineScale(16, 8, 480, 1920);
+        bottom: lineScale(48, 16, 480, 1920);
         width: calc(100% - lineScale(32, 16, 480, 1920));
         max-width: rem(440);
         box-sizing: border-box;

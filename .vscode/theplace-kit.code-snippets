@@ -160,7 +160,7 @@
 
 	// TS =============================================================
 	"replace-spaces": {
-		"scope": "vue,typescript",
+		"scope": "vue,typescript,html",
 		"prefix": "replace-spaces",
 		"body": "$0.trim().replace(\/\\s+/g, '')",
 		"description": "Удаление пробелов в строке RegExp",
@@ -178,6 +178,13 @@
 			"}"
 		],
 		"description": "Часто используемый тип интерфейса при работе с cms",
+	},
+
+	"slider-ref": {
+		"scope": "vue,typescript",
+		"prefix": "embla-ref",
+		"body": "const sliderRef = ref<{ emblaApi: EmblaCarouselType$0 | null } | null>(null);",
+		"description": "Ref ссылка на инстанс embla carousel"
 	},
 
 	// CSS / SCSS =======================================================

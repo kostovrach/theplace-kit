@@ -79,7 +79,7 @@ input[type='range']::-moz-range-thumb {
 }
 button {
     cursor: pointer;
-    background-color: inherit;
+    /* background-color: inherit; */
     all: unset;
 }
 button::-moz-focus-inner {

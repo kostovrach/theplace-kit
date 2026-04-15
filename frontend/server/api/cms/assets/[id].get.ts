@@ -4,5 +4,5 @@ export default eventHandler(async (event) => {
 
     const asset = await fetch(`${API_URL}/assets/${id}`);
 
-    return asset.body;
+    return asset;
 });
