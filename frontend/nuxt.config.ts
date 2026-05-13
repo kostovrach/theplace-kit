@@ -10,7 +10,13 @@ export default defineNuxtConfig({
     nitro: {
         preset: 'node-server',
     },
-    
+
+    vite: {
+        optimizeDeps: {
+            include: ['vue-final-modal'],
+        },
+    },
+
     modules: [
         '@pinia/nuxt',
         'nuxt-svg-sprite-icon',
@@ -39,7 +45,6 @@ export default defineNuxtConfig({
             target: process.env.SMTP_ORDERS_TARGET || 'empty',
         },
     },
-
 
     css: ['vue-final-modal/style.css', '~/assets/css/main.css'],
 
