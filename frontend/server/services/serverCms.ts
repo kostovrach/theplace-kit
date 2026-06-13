@@ -35,6 +35,47 @@ function expandFields(fields?: string[], relations?: string[]) {
     return f;
 }
 
+/** Нормализация query параметров под api Directus */
+function buildDirectusFilter(where?: Record<string, any> | any): any {
+    if (!where) return undefined;
+
+    // Если уже передан готовый фильтр Directus (_and, _or и т.д.)
+    if (
+        where._and ||
+        where._or ||
+        where._in ||
+        where._eq ||
+        Object.keys(where).some((k) => k.startsWith('_'))
+    ) {
+        return where;
+    }
+
+    const filter: any = {};
+
+    for (const [field, value] of Object.entries(where)) {
+        if (value === undefined) continue;
+
+        // Если значение уже содержит оператор (например, { price: { _gte: 100 } })
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+            filter[field] = value;
+        }
+        // Массив > автоматически _in
+        else if (Array.isArray(value)) {
+            filter[field] = { _in: value };
+        }
+        // null > _null
+        else if (value === null) {
+            filter[field] = { _null: true };
+        }
+        // Обычное значение > _eq
+        else {
+            filter[field] = { _eq: value };
+        }
+    }
+
+    return Object.keys(filter).length > 0 ? filter : undefined;
+}
+
 function normalize(res: any) {
     if (!res) return null;
     if (typeof res === 'object' && 'data' in res) {
@@ -54,7 +95,8 @@ export async function getDirectusCollection<T = any>(
     params: {
         fields?: string[];
         relations?: string[];
-        filter?: any;
+        filter?: any; // для совместимости
+        where?: Record<string, any>;
         sort?: string;
         limit?: number;
     } = {}
@@ -63,7 +105,13 @@ export async function getDirectusCollection<T = any>(
 
     const query: any = { fields };
 
-    if (params.filter) query.filter = params.filter;
+    // Приоритет: where > filter (where приоритетнее)
+    let finalFilter = params.where ? buildDirectusFilter(params.where) : params.filter;
+
+    if (finalFilter) {
+        query.filter = finalFilter;
+    }
+
     if (params.sort) query.sort = params.sort;
     if (params.limit !== undefined) query.limit = params.limit;
 

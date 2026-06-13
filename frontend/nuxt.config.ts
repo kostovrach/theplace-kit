@@ -7,6 +7,10 @@ export default defineNuxtConfig({
         typeCheck: true,
     },
 
+    experimental: {
+        payloadExtraction: true,
+    },
+
     nitro: {
         preset: 'node-server',
     },
@@ -14,6 +18,22 @@ export default defineNuxtConfig({
     vite: {
         optimizeDeps: {
             include: ['vue-final-modal'],
+        },
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks(id) {
+                        if (
+                            id.includes('svg-sprite-data') ||
+                            id.includes('nuxt-svg-sprite-icon') ||
+                            id.includes('svg-sprite')
+                        ) {
+                            return 'svg-sprite';
+                        }
+                        if (id.includes('embla-carousel')) return 'embla';
+                    },
+                },
+            },
         },
     },
 
@@ -61,6 +81,7 @@ export default defineNuxtConfig({
         strictMode: true,
         lang: 'ru_RU',
         version: 'v3',
+        typesInjection: false,
     },
 
     build: {

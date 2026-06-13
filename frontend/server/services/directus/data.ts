@@ -1,4 +1,4 @@
-import { directus } from './core';
+import { directus } from '~~/server/services/directus/core';
 import { readItems, readItem } from '@directus/sdk';
 
 /* ---------- normalizer: single entry point ---------- */

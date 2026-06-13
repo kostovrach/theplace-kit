@@ -4,4 +4,5 @@ export interface IPolicy {
     date_updated: string | null;
     title: string;
     content: string;
+    published: boolean;
 }

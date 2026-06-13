@@ -15,7 +15,7 @@
                 flexDirection: props.axis === 'x' ? 'row' : 'column',
                 gap: `${props.spaceBetween}px`,
                 height: props.axis === 'y' ? '100%' : 'fit-content',
-                touchAction: props.axis === 'x' ? 'pan-x pinch-zoom' : 'pan-y pinch-zoom',
+                // touchAction: props.axis === 'x' ? 'pan-x pinch-zoom' : 'pan-y pinch-zoom',
             }"
         >
             <slot></slot>

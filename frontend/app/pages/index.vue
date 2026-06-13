@@ -1,7 +1,7 @@
 <template>
-    <NuxtLayout>
+    <div>
         Главная страница
-    </NuxtLayout>
+    </div>
 </template>
 
 <script setup lang="ts"></script>
