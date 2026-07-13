@@ -32,16 +32,16 @@ source ~/.bashrc
 
 ## Node.js
 
-Установить нужную версию, например, v24.16.0
+Установить нужную версию, например, v24.18.0
 
 ```bash
-nvm install 24.16.0
+nvm install 24.18.0
 ```
 
 Переключиться на установленную версию
 
 ```bash
-nvm use v24.16.0
+nvm use v24.18.0
 ```
 
 Желательно использовать одну и ту же версию node при разработке и деплое
@@ -60,11 +60,40 @@ npm install -g pm2
 
 ## nginx
 
-Установка
+Ниже представлен пример установки `nginx` из официального репозитория, а не из стандартных пакетов `Ubuntu`, поскольку стандартно в `Ubuntu` устанавливается версия `1.24.x` или вообще `1.18.x`. Это legacy-версии, с устаревшим синтаксисов конфигов и отсутсвием нативной поддержки HTTP3. 
+
+Установка зависимостей для добавления нового репозитория:
+
+```bash
+curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+```
+
+Настройка репозитория на LTS версию:
+
+```bash
+echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] https://nginx.org/packages/ubuntu $(lsb_release -cs) nginx" | sudo tee /etc/apt/sources.list.d/nginx.list
+```
+
+Установка приоритетов, чтобы по умолчанию использовались официальные пакеты, а не системные:
+
+```bash
+echo -e "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" | sudo tee /etc/apt/preferences.d/99nginx
+
+```
+
+Обазательно обновиь кэш пакетов:
+
+```bash
+sudo apt update
+```
+
+Установка, непосредственно, nginx:
 
 ```bash
 sudo apt install nginx -y
 ```
+
+Можно проверить версю (`nginx -v`), если выводит версию выше 1.25.x, то все окей.
 
 Запуск
 

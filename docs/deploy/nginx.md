@@ -7,25 +7,20 @@ sudo apt install ufw -y
 sudo ufw allow OpenSSH  # Чтобы не потерять SSH-доступ
 sudo ufw allow 80/tcp   # Для HTTP (нужен для Certbot)
 sudo ufw allow 443/tcp  # Для HTTPS
+sudo ufw allow 443/udp  # Для HTTP3
 sudo ufw enable
 ```
 
 ## Конфигурационные файлы nginx
 
-Удаление дефолтного конфига
-
-```bash
-sudo rm /etc/nginx/sites-enabled/default
-```
-
 Создание конфигов для каждого домена (в примере: yourdomain.ru и cms.yourdomain.ru)
 
 ```bash
-code /etc/nginx/sites-available/yourdomain.ru
+code /etc/nginx/conf.d/yourdomain.ru.conf
 ```
 
 ```bash
-code /etc/nginx/sites-available/cms.yourdomain.ru
+code /etc/nginx/conf.d/cms.yourdomain.ru.conf
 ```
 
 ## Перовначальное содержимое конфигов
@@ -46,28 +41,6 @@ server {
         gzip_comp_level 6;
     }
 
-    gzip on;
-    gzip_comp_level 6;
-    gzip_min_length 1024;
-    gzip_types
-        text/plain text/css text/xml text/javascript
-        application/javascript application/json application/xml
-        image/svg+xml application/x-font-ttf font/opentype;
-
-    gzip_vary on;
-
-    location /api/cms/assets/ {
-        proxy_pass http://localhost:8055/assets/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_http_version 1.1;
-
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
     location / {
         proxy_pass http://localhost:3000;
         proxy_http_version 1.1;
@@ -86,8 +59,6 @@ server {
 server {
     server_name cms.<имя_домена>.ru;
 
-    client_max_body_size 5M; # ограничение размера на загрузку файлов в админке directus
-
     location / {
         proxy_pass http://localhost:8055;
         proxy_http_version 1.1;
@@ -99,16 +70,10 @@ server {
 }
 ```
 
-## Активация конфигов
-
-```bash
-sudo ln -s /etc/nginx/sites-available/yourdomain.ru /etc/nginx/sites-enabled/
-sudo ln -s /etc/nginx/sites-available/cms.yourdomain.ru /etc/nginx/sites-enabled/
-```
+Проверить конфиг на ошибки. При наличии ошибок сертификаты не выпустятся.
 
 ```bash
 sudo nginx -t  # Проверить конфиг на ошибки
-sudo systemctl restart nginx
 ```
 
 ## Настройка SSL с Certbot
@@ -139,13 +104,36 @@ sudo certbot --nginx -d yourdomain.ru -d www.yourdomain.ru -d cms.yourdomain.ru
 sudo certbot renew --dry-run
 ```
 
+## Полная конфигурация
+
+После выпуска сертификатов нужно полностью заменить оба существующих конфига (`yourdomain.ru.conf` и `cms.yourdomain.ru.conf`) на соответсвующие в папке [examples/nginx](./examples/nginx). Это нужно чтобы:
+
+- Во первых, заменить устаревший синтаксис конфига, который добавляет `Certbot`;
+- Во вторых, настроить работу HTTP3, что невозможно до выпуска сертификатов.
+
+(Важно: в новых конфигах заменить все `yourdomain.ru` на корректное имя домена, а в конфиге для основного домена в директиве `root` указать корректное название папки)
+
+После этого:
+
+Проверка синтаксиса:
+
+```bash
+sudo nginx -t
+```
+
+Рестарт `nginx`:
+
+```bash
+sudo systemctl restart nginx
+```
+
 ## Возможные ошибки
 
-Самая частая ошибка чаще всего вызвана либо опечаткой в домене при запуске получения сертификатов, либо невалидными/не установленными A-записями для доменов, либо, в случае перененоса домена между провайдерами
+Самая частая ошибка при выпуске сертификатов чаще всего вызвана либо опечаткой в домене при запуске получения сертификатов, либо невалидными/не установленными A-записями для доменов, либо, в случае перененоса домена между провайдерами
 
 Если домен был перенесен между провайдерами и возникла подобная ошибка, проблема почти точно решится сама через время
 
-```bash
+```
 Account registered.
 Requesting a certificate for yourdomain.ru and 2 more domains
 
@@ -156,11 +144,11 @@ Certbot failed to authenticate some domains (authenticator: nginx). The Certific
 
   Domain: yourdomain.ru
   Type:   unauthorized
-  Detail: 5.101.152.161: Invalid response from http://yourdomain.ru/.well-known/acme-challenge/FxwIOZ05JaT1Urt1BsiuHMInY5IvmPL4U93wDCqpuJ4: 500
+  Detail: 0.000.000.000: Invalid response from http://yourdomain.ru/.well-known/acme-challenge/: 500
 
   Domain: www.yourdomain.ru
   Type:   unauthorized
-  Detail: 5.101.152.161: Invalid response from http://www.yourdomain.ru/.well-known/acme-challenge/H5b8yQeTCa210cwBm7QRoxtrxnrBmX0ddCr0bb8HcEU: 500
+  Detail: 0.000.000.000: Invalid response from http://www.yourdomain.ru/.well-known/acme-challenge/: 500
 
 Hint: The Certificate Authority failed to verify the temporary nginx configuration changes made by Certbot. Ensure the listed domains point to this nginx server and that it is accessible from the internet.
 
