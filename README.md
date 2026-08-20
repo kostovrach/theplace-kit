@@ -25,9 +25,6 @@
 - `Docker` / `Docker Compose`  
   Локальная и серверная оркестрация сервисов (`Directus`, `PostgreSQL` и сопутствующая инфраструктура).
 
-- `PM2`  
-  Управление production-процессом Nuxt.
-
 - `Nginx`  
   Reverse proxy для frontend и CMS, маршрутизация доменов и раздача статики.
 

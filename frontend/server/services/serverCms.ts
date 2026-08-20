@@ -9,9 +9,12 @@ import {
     deleteItem,
 } from '@directus/sdk';
 
+// TODO: Сделать нормальную типизацию для всех методов
+
 const config = useRuntimeConfig();
 
 const API_URL = config.directus.url;
+/** Токен с правами на запись и изменение */
 const TOKEN = config.directus.crudToken;
 
 const directus = createDirectus(API_URL).with(rest()).with(staticToken(TOKEN));
@@ -78,13 +81,16 @@ function buildDirectusFilter(where?: Record<string, any> | any): any {
 
 function normalize(res: any) {
     if (!res) return null;
+
     if (typeof res === 'object' && 'data' in res) {
         const d = res.data;
         if (Array.isArray(d)) return d;
         if (d && typeof d === 'object') return d;
         return null;
     }
+
     if (Array.isArray(res)) return res;
+
     if (typeof res === 'object') return res;
 
     return null;
@@ -95,7 +101,7 @@ export async function getDirectusCollection<T = any>(
     params: {
         fields?: string[];
         relations?: string[];
-        filter?: any; // для совместимости
+        filter?: any; // для обратной совместимости
         where?: Record<string, any>;
         sort?: string;
         limit?: number;

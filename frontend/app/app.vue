@@ -5,9 +5,11 @@
         :throttle="200"
         :duration="2000"
     />
+
     <NuxtLayout>
         <NuxtPage />
     </NuxtLayout>
+
     <ModalsContainer />
     <TheCookieNotify />
 </template>
@@ -19,7 +21,7 @@
 
     /** закрытие всех модальных окон при клиентской навигации */
     router.beforeEach((to, from) => {
-        if (to.name !== from.name) {
+        if (to.path !== from.path) {
             const { closeAll } = useVfm();
             closeAll();
         }
@@ -27,11 +29,11 @@
 
     // SEO & Meta ==================================================
     useHead({
-        title: '<название_проекта>',
+        title: 'ThePlace-kit',
         htmlAttrs: {
             lang: 'ru',
         },
-        link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+        link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.svg' }],
         meta: [
             { name: 'theme-color', content: '#FFFFFF' },
             { property: 'og:type', content: 'website' },
@@ -39,7 +41,6 @@
             { property: 'og:image:height', content: '630' },
         ],
     });
-    // =============================================================
 </script>
 
 <style lang="scss">

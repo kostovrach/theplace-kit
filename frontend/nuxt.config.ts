@@ -15,6 +15,15 @@ export default defineNuxtConfig({
         preset: 'node-server',
     },
 
+    modules: [
+        '@pinia/nuxt',
+        'nuxt-svg-sprite-icon',
+        '@vueuse/nuxt',
+        '@primevue/nuxt-module',
+        '@vue-final-modal/nuxt',
+        'vue-yandex-maps/nuxt',
+    ],
+
     vite: {
         optimizeDeps: {
             include: ['vue-final-modal'],
@@ -37,20 +46,21 @@ export default defineNuxtConfig({
         },
     },
 
-    modules: [
-        '@pinia/nuxt',
-        'nuxt-svg-sprite-icon',
-        '@vueuse/nuxt',
-        '@primevue/nuxt-module',
-        '@vue-final-modal/nuxt',
-        'vue-yandex-maps/nuxt',
-    ],
-
     runtimeConfig: {
         public: {
             cmsUrl: process.env.DIRECTUS_URL || 'empty',
             siteUrl: process.env.SITE_URL || 'empty',
-            appEnv: (process.env.APP_ENV || 'prod') as 'dev' | 'prod',
+
+            /** dev / prod */
+            appEnv: process.env.APP_ENV || 'dev',
+        },
+        logger: {
+            /**
+             * - `DEBUG`: полное логирование
+             * - `ERROR`: только ошибки
+             * - `PROD`: предупреждения и ошибки
+             */
+            level: process.env.LOG_LEVEL || 'DEBUG',
         },
         directus: {
             url: process.env.DIRECTUS_URL || '',

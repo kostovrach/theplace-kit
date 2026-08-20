@@ -1,7 +1,16 @@
 import { directus } from '~~/server/services/directus/core';
 import { readItems, readItem } from '@directus/sdk';
 
-/* ---------- normalizer: single entry point ---------- */
+interface IDirectusQuery {
+    fields?: any;
+    filter?: any;
+    sort?: any;
+    limit?: any;
+}
+
+// TODO: Сделать нормальную типизацию для всех методов
+
+// Normalizer: single entry point =========================================
 /**
  * @returns
  * - массив (если Directus вернул массив или `{ data: [...] }`)
@@ -11,10 +20,10 @@ import { readItems, readItem } from '@directus/sdk';
 export function normalizeCollectionResponse(res: any): any | any[] | null {
     if (res == null) return null;
 
-    // Если Directus вернул "сырой" массив
+    // Если Directus вернул сырой массив
     if (Array.isArray(res)) return res;
 
-    // Если объект с data
+    // Если объект с ключом data
     if (res && typeof res === 'object' && 'data' in res) {
         const d = res.data;
         if (Array.isArray(d)) return d;
@@ -28,33 +37,25 @@ export function normalizeCollectionResponse(res: any): any | any[] | null {
     return null;
 }
 
-/* ---------- helpers ---------- */
-function buildParams({
-    fields,
-    filter,
-    sort,
-    limit,
-}: {
-    fields?: any;
-    filter?: any;
-    sort?: any;
-    limit?: any;
-}) {
+// Helpers ============================================================
+function buildParams({ fields, filter, sort, limit }: IDirectusQuery) {
     const params: Record<string, any> = {};
+
     if (fields) params.fields = fields;
     if (filter) params.filter = filter;
     if (sort) params.sort = sort;
     if (limit !== undefined) params.limit = limit;
+
     return params;
 }
 
-/* ---------- fetchCollection ---------- */
+// Methods =============================================================
 /**
  * @returns массив (коллекция) / singleton / `null`
  */
 export async function fetchCollection(
     collection: string,
-    params: { fields?: any; filter?: any; sort?: any; limit?: any } = {}
+    params: IDirectusQuery = {}
 ): Promise<any> {
     const fields = params.fields ?? ['*'];
 

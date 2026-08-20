@@ -1,11 +1,13 @@
 <template>
-    <div>
+    <div class="home">
         Главная страница
     </div>
 </template>
 
-<script setup lang="ts"></script>
-
-<style scoped lang="scss">
-    @use '~/assets/scss/abstracts' as *;
-</style>
+<script setup lang="ts">
+    interface IPage {
+        id: string | number;
+        date_created: string;
+        date_updated: string | null;
+    }
+</script>

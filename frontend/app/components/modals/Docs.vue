@@ -62,7 +62,7 @@
     }>();
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
     @use '~/assets/scss/abstracts' as *;
 
     .modal-docs {
@@ -124,68 +124,8 @@
             margin-top: rem(64);
             padding: 0 lineScale(64, 16, 480, 1920);
         }
-        &__content {
-            display: flex;
-            flex-direction: column;
-            gap: rem(16);
-            font-size: lineScale(17, 15, 480, 1920);
-            line-height: 1.5;
-            h2,
-            h3,
-            h4,
-            h5,
-            h6 {
-                scroll-margin: rem(128);
-                font-size: lineScale(32, 24, 480, 1920);
-                margin-top: rem(32);
-                font-weight: $fw-semi;
-            }
-            tr {
-                text-align-last: left;
-            }
-            th {
-                font-weight: normal;
-                font-size: lineScale(24, 18, 480, 1920);
-            }
-            ol > li,
-            ul > li {
-                margin-left: rem(20);
-            }
-            ol > li {
-                list-style: decimal outside;
-            }
-            ul > li {
-                list-style: disc outside;
-            }
-            img,
-            picture,
-            video {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                margin-top: rem(32);
-            }
-            a {
-                text-decoration: underline;
-                color: $c-accent;
-                @media (pointer: fine) {
-                    &:hover {
-                        text-decoration: none;
-                    }
-                }
-            }
-            hr {
-                width: 100%;
-                height: rem(1);
-                background: linear-gradient(
-                    90deg,
-                    transparent 0%,
-                    rgba($c-000000, 0.5) 10%,
-                    rgba($c-000000, 0.5) 90%,
-                    transparent 100%
-                );
-                margin: rem(16) 0;
-            }
+        &__content:deep() {
+            @include text-content;
         }
     }
 </style>

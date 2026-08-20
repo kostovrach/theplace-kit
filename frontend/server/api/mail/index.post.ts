@@ -1,15 +1,10 @@
-import nodemailer from 'nodemailer';
 import validator from 'validator';
-import Mail from 'nodemailer/lib/mailer';
 import { parsePhoneNumberWithError } from 'libphonenumber-js';
 
 import { rateLimiter } from '~~/server/utils/rateLimiter';
+import { sendEmail } from '~~/server/services/sendEmail';
 
-const config = useRuntimeConfig();
-const smtpConfig = config.smtp;
-const isDev = config.public.appEnv === 'dev';
-
-let transporter: nodemailer.Transporter | null;
+import type { IEmailRequest } from '~~/shared/types/entities/request';
 
 export default defineEventHandler(
     async (event): Promise<{ status: number; success: boolean; message?: string }> => {
@@ -21,33 +16,8 @@ export default defineEventHandler(
             };
         }
 
-        if (!transporter) {
-            if (isDev) {
-                const testAccount = await nodemailer.createTestAccount();
-                transporter = nodemailer.createTransport({
-                    host: 'smtp.ethereal.email',
-                    port: 587,
-                    secure: false,
-                    auth: {
-                        user: testAccount.user,
-                        pass: testAccount.pass,
-                    },
-                });
-            } else {
-                transporter = nodemailer.createTransport({
-                    host: smtpConfig.host,
-                    port: Number(smtpConfig.port),
-                    secure: true,
-                    auth: {
-                        user: smtpConfig.user,
-                        pass: smtpConfig.pass,
-                    },
-                });
-            }
-        }
-
         try {
-            const body = await readBody<{ email?: string; phone?: string }>(event);
+            const body = await readBody<IEmailRequest>(event);
             if (!body) {
                 return { status: 400, success: false, message: 'В запросе отсутсвуют данные' };
             }
@@ -79,23 +49,7 @@ export default defineEventHandler(
                 }
             }
 
-            const mailOptions: Mail.Options = {
-                from: 'Заявка',
-                to: smtpConfig.target,
-                subject: 'Новая заявка с сайта',
-                html: ``,
-            };
-
-            const res = await transporter.sendMail(mailOptions);
-
-            if (isDev) {
-                console.log('Preview URL:', nodemailer.getTestMessageUrl(res));
-            }
-
-            return {
-                status: 200,
-                success: true,
-            };
+            return await sendEmail(body);
         } catch {
             return {
                 status: 500,

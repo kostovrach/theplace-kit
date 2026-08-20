@@ -1,7 +1,7 @@
 /**
  * Проверка, запущен ли браузер на Chromium-движке
  *
- * @returns `true`, если браузер основан на Chromium (Chrome / Edge / Opera)
+ * @returns `true`, если браузер Chrome / Edge / Opera
  */
 export function isChromium() {
     const userAgent = navigator.userAgent.toLowerCase();

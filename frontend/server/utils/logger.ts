@@ -27,10 +27,21 @@ function getFormattedTime(): string {
 
 /**
  * Функция для унифицированного логирования, включая время вызова
- * @param prefix префикс перед содрежванием лога
+ * @param prefix префикс перед содержанием лога
+ * @param level уровень лога (error / warn / log)
  * @param args произвольные данные для вывода
- * Вывод вида: `[2026-05-12 14:32:11] DEBUG: content loaded`
+ * Вывод вида: `[2026-05-12 14:32:11] LOG [DEBUG]: content loaded`
  */
-export function logger(prefix: string, ...args: unknown[]) {
-    console.log(`[${getFormattedTime()}]`, `${prefix}:`, ...args);
+export function logger(
+    level: 'log' | 'warn' | 'error' = 'log',
+    prefix: string,
+    ...args: unknown[]
+) {
+    const LOG_LEVEL = useRuntimeConfig().logger.level;
+    const displayLevel = `${level.toUpperCase()}  `.slice(0, 5);
+
+    if (LOG_LEVEL === 'WARN' && level === 'log') return;
+    if (LOG_LEVEL === 'ERROR' && (level === 'log' || level === 'warn')) return;
+
+    console.log(`[${getFormattedTime()}]`, displayLevel, `[${prefix}]:`, ...args);
 }

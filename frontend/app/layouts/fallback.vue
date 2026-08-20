@@ -1,7 +1,7 @@
 <template>
-    <div class="page">
+    <div class="fallback-page">
         <TheHeader />
-        <main class="page__content">
+        <main class="fallback-page__content">
             <slot></slot>
         </main>
         <TheFooter />
@@ -13,7 +13,7 @@
 <style scoped lang="scss">
     @use '~/assets/scss/abstracts' as *;
 
-    .page {
+    .fallback-page {
         min-height: 100lvh;
         display: flex;
         flex-direction: column;
