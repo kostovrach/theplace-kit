@@ -107,7 +107,7 @@
 - [pick](./docs/utils/pick.md)
   <br />
   <br />
-- [expandAssetPath](./docs/utils/expandAssetPath.md)
+- [getAssetPath](./docs/utils/getAssetPath.md)
 - [isChromium](./docs/utils/isChromium.md)
 - [partialHiddenPhone](./docs/utils/partialHiddenPhone.md)
   <br />

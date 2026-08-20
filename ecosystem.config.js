@@ -19,8 +19,8 @@ module.exports = {
 			env: {
 				NODE_ENV: 'production',
 				NITRO_PORT: 3000,
-				NITRO_HOST: '0.0.0.0',           // для превью
-            	// NITRO_HOST: '127.0.0.1',      // для продакшена с nginx
+            	NITRO_HOST: '127.0.0.1',      // для продакшена с nginx
+				// NITRO_HOST: '0.0.0.0',     // для превью
 			},
 		},
 	],

@@ -57,7 +57,7 @@ server {
 
 ```conf
 server {
-    server_name cms.<имя_домена>.ru;
+    server_name cms.<имя_домена>.ru www.cms.<имя_домена>.ru;
 
     location / {
         proxy_pass http://localhost:8055;
@@ -95,7 +95,7 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 Запуск Certbot для получения сертификатов
 
 ```bash
-sudo certbot --nginx -d yourdomain.ru -d www.yourdomain.ru -d cms.yourdomain.ru
+sudo certbot --nginx -d yourdomain.ru -d www.yourdomain.ru -d cms.yourdomain.ru -d www.cms.yourdomain.ru
 ```
 
 Проверка автопродления
