@@ -11,23 +11,21 @@
 	"studio-label": {
 		"scope": "vue,html",
 		"prefix": "studio-label",
-		"body": "<iframe src='//intheplace.ru/brand-iframe' width='100%' height='62' scrolling='yes' frameborder='0'></iframe>",
+		"body": "<iframe title=\"Developed by Kulaginstudio\" src=\"//kulaginstudio.ru/brand-iframe\" width=\"100%\" height=\"62\" scrolling=\"yes\" frameborder=\"0\"></iframe>",
 		"description": "iframe бренда студии Кулагина",
 	},
 
 	"link-rel": {
 		"scope": "vue,html",
 		"prefix": "link-rel",
-		"body": "rel='noopener noreferrer'",
-		"description": "rel attr for links with target='_blank'",
+		"body": "rel=\"noopener noreferrer\"",
+		"description": "Атрибут rel для ссылок с target='_blank'",
 	},
 	
 	"picture": {
 		"scope": "vue,html",
 		"prefix": "pic",
-		"body": [
-			"<picture class=\"$1__image-container\">\n\t<img class=\"$1__image\" src=\"${2:img/fill-image.jpg}\" ${3|width,height|}=\"$4\" alt=\"$5\">\n</picture>"
-		],
+		"body": "<picture class=\"$1__cover\">\n\t<img class=\"$1__cover-image\" src=\"$2\" alt=\"$4\">\n</picture>",
 		"description": "Быстрый вызов тега picture"
 	},
 	
@@ -59,9 +57,9 @@
 		"scope": "vue",
 		"body": [
 			"<template>",
-			"\t<NuxtLayout>",
-			"\t\t",
-			"\t</NuxtLayout>",
+			"\t<${2:div} class=\"$1\">",
+			"\t\t$0",
+			"\t</${2:div}>",
 			"</template>",
 			"",
 			"<script setup lang=\"ts\">",
@@ -71,10 +69,12 @@
 			"<style scoped lang=\"scss\">",
 			"\t@use '~/assets/scss/abstracts' as *;",
 			"\t",
-			"\t",
+			"\t.$1 {",
+			"\t\t",
+			"\t}",
 			"</style>",
 		],
-		"description": "кастомный сетап однофайлового компонента vue",
+		"description": "Кастомный сетап однофайлового компонента vue",
 	},
 
 	"vue-final-modal-setup": {
@@ -120,40 +120,30 @@
 		"prefix": "seo",
 		"body": [
 			"// SEO & Meta ==================================================",
-			"const siteUrl = useRuntimeConfig().public.siteUrl;",
+			"const config = useRuntimeConfig();",
+			"const route = useRoute();",
+			"const seoUrl = `${config.public.siteUrl}${route.path}`;",
+			"\t",
 			"useHead({",
-			"\ttitle: ${1:content}.value?.meta_title ?? '',",
+			"\ttitle: ${1:page}.value?.meta_title ?? undefined,",
 			"\tmeta: [",
-			"\t\t{ name: 'description', content: ${1:content}.value?.meta_description ?? '' },",
-			"\t\t{ name: 'robots', content: ${1:content}.value?.meta_robots ?? 'index, follow' },",
-			"\t\t{ name: 'keywords', content: ${1:content}.value?.meta_keywords ?? [] },",
+			"\t\t{ name: 'description', content: ${1:page}.value?.meta_description ?? undefined },",
+			"\t\t{ name: 'robots', content: ${1:page}.value?.meta_robots ?? 'index, follow' },",
+			"\t\t{ name: 'keywords', content: ${1:page}.value?.meta_keywords.join(' ') ?? undefined },",
 			"\t\t",
-			"\t\t{ property: 'og:title', content: ${1:content}.value?.meta_title ?? '' },",
-			"\t\t{ property: 'og:description', content: ${1:content}.value?.meta_description ?? '' },",
-			"\t\t{ property: 'og:type', content: ${1:content}.value?.og_type ?? 'website' },",
+			"\t\t{ property: 'og:title', content: ${1:page}.value?.meta_title ?? undefined },",
+			"\t\t{ property: 'og:description', content: ${1:page}.value?.meta_description ?? undefined },",
+			"\t\t{ property: 'og:type', content: ${1:page}.value?.og_type ?? 'website' },",
 			"\t\t{",
 			"\t\t\tproperty: 'og:image',",
-			"\t\t\tcontent: ${1:content}.value?.og_image",
-			"\t\t\t\t? `\\${siteUrl}/api/cms/assets/${${1:content}.value.og_image}`",
-			"\t\t\t\t: '',",
-			"\t\t}",
-			"\t\t{ property: 'og:url', content: useRequestURL().href },",
+			"\t\t\tcontent: ${1:page}.value?.og_image ? getAssetPath(page.value.og_image) : undefined",
+			"\t\t},",
+			"\t\t{ property: 'og:url', content: () => seoUrl },",
 			"\t\t",
 			"\t\t{ name: 'twitter:card', content: 'summary_large_image' },",
-			"\t\t{ name: 'twitter:title', content: ${1:content}.value?.meta_title ?? '' },",
+			"\t\t{ name: 'twitter:title', content: ${1:page}.value?.meta_title ?? undefined },",
 			"\t],",
 			"});",
-			"",
-			"if (${1:content}.value?.shema_markup) {",
-			"\tuseHead({",
-			"\t\tscript: [",
-			"\t\t\t{",
-			"\t\t\t\ttype: 'application/ld+json',",
-			"\t\t\t\tinnerHTML: ${1:content}.value.shema_markup || {},",
-			"\t\t\t}",
-			"\t\t],",
-			"\t});",
-			"};",
 		],
 		"description": "SEO конфигурация страницы"
 	},
@@ -163,7 +153,7 @@
 		"scope": "vue,typescript,html",
 		"prefix": "replace-spaces",
 		"body": "$0.trim().replace(\/\\s+/g, '')",
-		"description": "Удаление пробелов в строке RegExp",
+		"description": "Удаление пробелов в строке RegExp (deprecated: лучше использовать утилиту replaceSpaces)",
 	},
 	
 	"content-interface": {
@@ -228,7 +218,7 @@
 		"body": [
 			"gap: rem($1);"
 		],
-		"description": "Отступы между элементами (одинарный)"
+		"description": "Отступы между элементами (singleton)"
 	},
 
 	"gg": {
@@ -273,7 +263,7 @@
 		"body": [
 			"&::before{\n\tcontent:'';\n\t$0\n}"
 		],
-		"description": "Псевдоэлемент до"
+		"description": "Псевдоэлемент before"
 	},
 
 	"a": {
@@ -282,7 +272,7 @@
 		"body": [
 			"&::after{\n\tcontent:'';\n\t$0\n}"
 		],
-		"description": "Псевдоэлемент после"
+		"description": "Псевдоэлемент after"
 	},
 	
 	"count": {
@@ -316,7 +306,7 @@
 		"scope": "vue,css,scss",
 		"prefix": "ta",
 		"body": [
-			"transition: ${1:all} ${2:\\$td} ${3:\\$tf} 0s;"
+			"transition: ${1:all} ${2:\\$td} ${3:\\$tf};"
 		],
 		"description": "Transition"
 	},
@@ -327,7 +317,7 @@
 		"body": [
 			"border-radius: 50%;"
 		],
-		"description": "Закругление на 50%"
+		"description": "border-radius на 50%"
 	},
 	
 	"pointer-events": {
