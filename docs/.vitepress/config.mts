@@ -8,6 +8,7 @@ export default defineConfig({
 	description: 'Библиотека компонентов и архитектурных решений на базе Nuxt и Directus',
 	head: [
 		['link', { rel: 'icon', type: 'image/svg+xml', href: '/theplace-kit/logo.svg' }],
+		['link', { rel: 'stylesheet', type: 'text/css', href: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css' }],
 		['meta', { property: 'og:title', content: 'ThePlace-kit' }],
 		['meta', { property: 'og:description', content: 'Библиотека компонентов и архитектурных решений на базе Nuxt и Directus' }],
 	],
@@ -15,6 +16,8 @@ export default defineConfig({
 		// https://vitepress.dev/reference/default-theme-config
 
 		outline: 'deep',
+
+		logo: '/logo.svg',
 
 		nav: [
 			{ text: 'Главная', link: '/' },
@@ -32,7 +35,7 @@ export default defineConfig({
 					{ text: 'PWA', link: '/pwa' },
 				],
 			},
-			{ text: 'v4.0.1', link: '' },
+			{ text: 'v4.1.0', link: '' },
 		],
 
 		sidebar: [
@@ -156,6 +159,11 @@ export default defineConfig({
 				],
 			},
 		],
+
+		footer: {
+			message: 'Опубликовано под <a href="https://github.com/kostovrach/theplace-kit/blob/main/LICENSE.txt" target="_blank">лицензией MIT</a>.',
+			copyright: '© 2025, Anton Melnikov',
+		},
 
 		socialLinks: [{ icon: 'github', link: 'https://github.com/kostovrach/theplace-kit', target: '_blank' }],
 
