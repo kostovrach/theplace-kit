@@ -1,4 +1,4 @@
-# Theplace-kit <br> Slugify
+# Slugify
 
 Утилита для преобразования строки в URL-friendly slug с транслитерацией кириллицы в латиницу.
 

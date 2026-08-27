@@ -1,4 +1,4 @@
-# Theplace-kit <br> NormalizeUrl
+# NormalizeUrl
 
 Утилита для извлечения корневого домена (hostname) из URL-строки.
 

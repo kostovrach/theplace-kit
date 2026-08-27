@@ -1,4 +1,4 @@
-# Theplace-kit <br /> Code Style
+# Code Style
 
 ## Общие принципы
 

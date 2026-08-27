@@ -1,4 +1,4 @@
-# Theplace-kit <br> Pick
+# Pick
 
 Утилита для создания нового объекта, содержащего **только** указанные ключи.  
 Типизированный аналог `lodash.pick`.
@@ -16,40 +16,40 @@
 
 ## Аргументы
 
-| Параметр | Тип                        | Описание                              |
-| -------- | -------------------------- | ------------------------------------- |
-| `obj`    | `T`                        | Исходный объект                       |
-| `keys`   | `(keyof T)[]`              | Массив ключей, которые нужно оставить |
+| Параметр | Тип           | Описание                              |
+| -------- | ------------- | ------------------------------------- |
+| `obj`    | `T`           | Исходный объект                       |
+| `keys`   | `(keyof T)[]` | Массив ключей, которые нужно оставить |
 
 ## Возвращаемое значение
 
-| Тип          | Описание                          |
-| ------------ | --------------------------------- |
+| Тип          | Описание                                 |
+| ------------ | ---------------------------------------- |
 | `Pick<T, K>` | Новый объект только с выбранными ключами |
 
 ## Пример использования
 
 ```ts
 interface User {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: 'admin' | 'user';
-  createdAt: Date;
+	id: string;
+	name: string;
+	email: string;
+	password: string;
+	role: 'admin' | 'user';
+	createdAt: Date;
 }
 
 const user: User = {
-  id: "1",
-  name: "Иван Иванович",
-  email: "ivan@example.com",
-  password: "secret123",
-  role: "user",
-  createdAt: new Date()
+	id: '1',
+	name: 'Иван Иванович',
+	email: 'ivan@example.com',
+	password: 'secret123',
+	role: 'user',
+	createdAt: new Date(),
 };
 
 // Выбираем только публичные поля
-const publicUser = pick(user, ["id", "name", "email"]);
+const publicUser = pick(user, ['id', 'name', 'email']);
 
 // Результат:
 // {
@@ -59,5 +59,5 @@ const publicUser = pick(user, ["id", "name", "email"]);
 // }
 
 // Можно использовать для нескольких выборок
-const credentials = pick(user, ["email", "password"]);
+const credentials = pick(user, ['email', 'password']);
 ```

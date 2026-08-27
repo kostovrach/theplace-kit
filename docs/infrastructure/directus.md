@@ -1,4 +1,4 @@
-# Theplace-kit <br \> Directus Dockerfile
+# Directus Dockerfile
 
 ```dockerfile
 FROM directus/directus:11.15.0

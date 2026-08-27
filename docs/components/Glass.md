@@ -1,4 +1,4 @@
-# Theplace-kit <br> Glass effect
+# Glass effect
 
 Набор компонентов для реализации liquid glass через SVG-фильтр.
 

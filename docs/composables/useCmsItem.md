@@ -1,4 +1,4 @@
-# Theplace-kit <br> useCmsItem
+# useCmsItem
 
 Composable для получения одной сущности из multiple коллекции CMS по `id` с поддержкой SSR-кэширования и загрузки связанных данных.
 

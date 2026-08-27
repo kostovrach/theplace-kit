@@ -1,4 +1,7 @@
 {
+	"name": "theplace-kit",
+	"type": "module",
+	"private": false,
 	"scripts": {
 		"db:enter": "docker exec -it directus_postgres psql -U directus -d postgres",
 		"db:init-postgis": "docker exec -i directus_postgres psql -U directus -d directus < scripts/init_postgis.sql",
@@ -6,6 +9,12 @@
 		"db:restore": "docker exec -i directus_postgres psql -U directus -d directus < ./cms/backups/backup.sql",
 		"db:s3-migrate": "docker exec -i directus_postgres psql -U directus -d directus -c \"UPDATE directus_files SET storage = 's3' WHERE storage = 'local';\"",
 		"schema:backup": "docker exec -it directus_app npx directus schema snapshot ./cms/backups/schema.yaml",
-		"schema:restore": "docker exec -it directus_app npx directus schema apply ./cms/backups/schema.yaml"
+		"schema:restore": "docker exec -it directus_app npx directus schema apply ./cms/backups/schema.yaml",
+		"docs:dev": "vitepress dev docs",
+		"docs:build": "vitepress build docs",
+		"docs:preview": "vitepress preview docs"
+	},
+	"devDependencies": {
+		"vitepress": "2.0.0-alpha.19"
 	}
 }

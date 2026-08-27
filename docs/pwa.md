@@ -1,4 +1,4 @@
-# Theplace-kit <br> Перестройка проекта под PWA
+# Перестройка проекта под PWA
 
 ## Установка зависимостей
 
@@ -187,6 +187,8 @@ frontend/
 ## Подключение иконок к приложеню
 
 Тут будет только подключение splash screens, иконки в конце в полном конфиге
+
+::: details
 
 ```typescript
 useHead({
@@ -416,7 +418,11 @@ useHead({
 });
 ```
 
+:::
+
 ## Полный конфиг PWA
+
+::: details
 
 ```typescript
 export default defineNuxtConfig({
@@ -434,13 +440,13 @@ export default defineNuxtConfig({
 		manifest: {
 			name: 'Студия Игоря Кулагина: создание и поддержка сайтов и брендов',
 			short_name: 'Kulaginstudio',
-            /** Формат отображения приложения */
+			/** Формат отображения приложения */
 			display: 'standalone', // "fullscreen" | "standalone" | "minimal-ui" | "browser"
 			background_color: '#F5F3E3',
 			theme_color: '#0E0E10',
 			start_url: '/',
 			scope: '/',
-            /** Массив иконок */
+			/** Массив иконок */
 			icons: [
 				{
 					src: '/pwa/windows/SmallTile.scale-100.png',
@@ -1006,7 +1012,7 @@ export default defineNuxtConfig({
 		},
 
 		workbox: {
-            /** Авто-очистка кэша */
+			/** Авто-очистка кэша */
 			cleanupOutdatedCaches: true,
 			clientsClaim: true,
 			skipWaiting: true,
@@ -1044,3 +1050,5 @@ export default defineNuxtConfig({
 	},
 });
 ```
+
+:::

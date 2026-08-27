@@ -1,4 +1,4 @@
-# Theplace-kit <br> ExpandAssetPath
+# ExpandAssetPath
 
 Утилита для формирования полного URL к файлам из библиотеки Directus.
 

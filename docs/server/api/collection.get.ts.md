@@ -1,4 +1,4 @@
-# Theplace-kit <br> API Route: `/api/cms/[collection]`
+# API Route: `/api/cms/[collection]`
 
 Серверный cached handler Nuxt для получения данных из Directus CMS.  
 Работает как универсальный API-прокси для всех коллекций.

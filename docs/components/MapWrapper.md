@@ -1,4 +1,4 @@
-# Theplace-kit <br> MapWrapper
+# MapWrapper
 
 Компонент-обёртка над `vue-yandex-maps`, для отображения карты с маркерами, попапами и базовым управлением.
 

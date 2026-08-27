@@ -1,4 +1,4 @@
-# Theplace-kit <br> NormalizeFileSize
+# NormalizeFileSize
 
 Утилита для преобразования размера файла из байтов в человеко-читаемый формат.
 

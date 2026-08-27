@@ -1,4 +1,4 @@
-# Theplace-kit <br> ButtonPrimary
+# ButtonPrimary
 
 Универсальный компонент кнопки, который может рендериться как `<button>`, `<a>` или `NuxtLink` в зависимости от переданного пропса `is`.
 

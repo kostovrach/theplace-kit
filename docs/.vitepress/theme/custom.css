@@ -1,0 +1,27 @@
+:root {
+	--vp-c-brand-1: #ea3546; /* Основной акцент */
+	--vp-c-brand-2: #b91c1c; /* Ховер */
+	--vp-c-brand-3: #ea3546; /* Контраст */
+
+	--vp-code-color: #ea3546; /* Цвет кода */
+}
+
+.dark {
+	--vp-c-bg: #0f0f11;
+}
+
+.VPHome .image {
+	position: relative;
+}
+
+.VPHome .image::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-image: url('/logo.svg');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	filter: drop-shadow(0 0 75px var(--vp-c-brand-1)) blur(15px);
+	opacity: 0.45;
+	border-radius: 50%;
+}

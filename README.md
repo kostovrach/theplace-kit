@@ -1,6 +1,6 @@
 # Theplace-kit
 
-`Theplace-kit` — внутренний шаблон для быстрого старта новых проектов на базе `Nuxt` и `Directus`.  
+`Theplace-kit` — Библиотека компонентов и архитектурных решений на базе `Nuxt` и `Directus`.  
 Содержит готовые архитектурные решения, API-слой, набор переиспользуемых компонентов, утилиты и инфраструктурную документацию.
 
 Проект в первую очередь ориентирован на разработчиков команды, но распространяется как open-source.
@@ -84,8 +84,8 @@
 
 ### Server API
 
-- [[collection].get.ts](./docs/server/api/%5Bcollection%5D.get.ts.md)
-- [[collection][id].get.ts](./docs/server/api/%5Bcollection%5D%5Bid%5D.get.ts.md)
+- [[collection].get.ts](./docs/server/api/collection.get.ts.md)
+- [[collection][id].get.ts](./docs/server/api/collection-id.get.ts.md)
 
 ---
 

@@ -1,4 +1,4 @@
-# Theplace-kit <br> Docker Compose
+# Docker Compose
 
 ## Назначение
 

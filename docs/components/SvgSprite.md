@@ -1,4 +1,4 @@
-# Theplace-kit <br> SvgSprite
+# SvgSprite
 
 Обёртка над компонентом `SvgIcon` для упрощённого использования SVG-иконок через спрайт.
 

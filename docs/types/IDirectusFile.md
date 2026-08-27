@@ -1,4 +1,4 @@
-# Theplace-kit <br> IDirectusFile & GetMockFile
+# IDirectusFile & GetMockFile
 
 Типизация и утилита для работы с файлами из Directus.
 
@@ -8,18 +8,18 @@
 
 ### Поля
 
-| Поле                | Тип                  | Описание                                      |
-| ------------------- | -------------------- | --------------------------------------------- |
-| `id`                | `string \| number`   | Уникальный идентификатор файла               |
-| `filename_disk`     | `string`             | Имя файла на диске (обычно `id + .расширение`) |
-| `filename_download` | `string`             | Оригинальное имя файла при скачивании        |
-| `type`              | `string`             | MIME-тип файла (`image/jpeg`, `video/mp4` и т.д.) |
-| `filesize`          | `string`             | Размер файла в байтах                         |
-| `title`             | `string \| null`     | Заголовок файла                               |
-| `description`       | `string \| null`     | Описание файла                                |
-| `created_on`        | `string`             | Дата создания                                 |
-| `modified_on`       | `string \| null`     | Дата последнего изменения                     |
-| `storage`           | `string`             | Хранилище (`local`, `s3` или т.п.)            |
+| Поле                | Тип                | Описание                                          |
+| ------------------- | ------------------ | ------------------------------------------------- |
+| `id`                | `string \| number` | Уникальный идентификатор файла                    |
+| `filename_disk`     | `string`           | Имя файла на диске (обычно `id + .расширение`)    |
+| `filename_download` | `string`           | Оригинальное имя файла при скачивании             |
+| `type`              | `string`           | MIME-тип файла (`image/jpeg`, `video/mp4` и т.д.) |
+| `filesize`          | `string`           | Размер файла в байтах                             |
+| `title`             | `string \| null`   | Заголовок файла                                   |
+| `description`       | `string \| null`   | Описание файла                                    |
+| `created_on`        | `string`           | Дата создания                                     |
+| `modified_on`       | `string \| null`   | Дата последнего изменения                         |
+| `storage`           | `string`           | Хранилище (`local`, `s3` или т.п.)                |
 
 ## Функция `getMockFile`
 
@@ -31,16 +31,16 @@
 
 ## Аргументы
 
-| Параметр   | Тип      | Описание                                      |
-| ---------- | -------- | --------------------------------------------- |
-| `path`     | `string` | Локальный путь или идентификатор файла (подставляется в `id`) |
-| `type`     | `string` | MIME-тип файла (`image/jpeg`, `video/mp4` и т.д.) |
+| Параметр | Тип      | Описание                                                      |
+| -------- | -------- | ------------------------------------------------------------- |
+| `path`   | `string` | Локальный путь или идентификатор файла (подставляется в `id`) |
+| `type`   | `string` | MIME-тип файла (`image/jpeg`, `video/mp4` и т.д.)             |
 
 ## Возвращаемое значение
 
-| Тип              | Описание                          |
-| ---------------- | --------------------------------- |
-| `IDirectusFile`  | Мок-объект файла Directus         |
+| Тип             | Описание                  |
+| --------------- | ------------------------- |
+| `IDirectusFile` | Мок-объект файла Directus |
 
 ## Пример использования
 
@@ -50,7 +50,7 @@ const mockImage = getMockFile('/images/photo.jpg', 'image/jpeg');
 const mockVideo = getMockFile('/videos/intro.mp4', 'video/mp4');
 ```
 
-``` vue
+```vue
 <!-- Использование в компонентах -->
 <Component :image="getMockFile('/images/photo.jpg', 'image/jpeg')" />
 ```

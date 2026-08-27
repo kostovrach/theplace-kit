@@ -1,4 +1,4 @@
-# Theplace-kit <br> NormalizeDate
+# NormalizeDate
 
 Утилита для форматирования даты в человеко-читаемый русский формат.
 

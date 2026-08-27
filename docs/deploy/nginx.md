@@ -1,4 +1,4 @@
-# Theplace-kit <br> Настройка nginx и выпуск SSL сертификатов
+# Настройка nginx и выпуск SSL сертификатов
 
 ## Активация firewall
 
@@ -27,7 +27,7 @@ code /etc/nginx/conf.d/cms.yourdomain.ru.conf
 
 ### yourdomain.ru
 
-```conf
+```txt
 server {
     server_name <имя_домена>.ru www.<имя_домена>.ru;
 
@@ -55,7 +55,7 @@ server {
 
 ### cms.yourdomain.ru
 
-```conf
+```txt
 server {
     server_name cms.<имя_домена>.ru www.cms.<имя_домена>.ru;
 
@@ -106,7 +106,9 @@ sudo certbot renew --dry-run
 
 ## Полная конфигурация
 
-После выпуска сертификатов нужно полностью заменить оба существующих конфига (`yourdomain.ru.conf` и `cms.yourdomain.ru.conf`) на соответсвующие в папке [examples/nginx](/examples/nginx). Это нужно чтобы:
+После выпуска сертификатов нужно полностью заменить оба существующих конфига (`yourdomain.ru.conf` и `cms.yourdomain.ru.conf`) на соответсвующие (код в конце блока)
+
+Это нужно чтобы:
 
 - Во первых, заменить устаревший синтаксис конфига, который добавляет `Certbot`;
 - Во вторых, настроить работу HTTP3, что невозможно до выпуска сертификатов.
@@ -126,6 +128,201 @@ sudo nginx -t
 ```bash
 sudo systemctl restart nginx
 ```
+
+### yourdomain.ru.conf
+
+::: details
+
+```txt
+# Блок для HTTP (порт 80): редиректит абсолютно все сразу на HTTPS без www
+server {
+    listen 80;
+    server_name yourdomain.ru www.yourdomain.ru;
+    return 301 https://yourdomain.ru$request_uri;
+}
+
+# Блок для HTTPS с WWW: ловит запросы https://www.yourdomain.ru и редиректит на https://yourdomain.ru
+server {
+    listen 443 ssl;
+    listen 443 quic;
+    http2 on;
+    server_name www.yourdomain.ru;
+
+    # Заголовок поддержки HTTP3
+    add_header Alt-Svc 'h3=":443"; ma=86400';
+
+    # SSL сертификаты (необходимы, чтобы браузер не ругался до выполнения редиректа)
+    ssl_certificate /etc/letsencrypt/live/yourdomain.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.ru/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    return 301 https://yourdomain.ru$request_uri;
+}
+
+# Основной блок: обрабатывает только чистый домен https://yourdomain.ru
+server {
+    listen 443 ssl;
+    listen 443 quic;
+    http2 on;
+    server_name yourdomain.ru;
+
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+
+    root /srv/yourdomain/frontend/.output/public;
+
+    # Сжатие Gzip
+    gzip on;
+    gzip_comp_level 6;
+    gzip_min_length 1024;
+    gzip_types
+        text/plain text/css text/xml text/javascript
+        application/javascript application/json application/xml
+        image/svg+xml application/x-font-ttf font/opentype;
+    gzip_vary on;
+
+    # Статика Nuxt
+    location /_nuxt/ {
+        try_files $uri =404;
+        expires 1y;
+        # Второе объявление HTTP3, поскольку в этом блоке заголовки перетираются
+        add_header Alt-Svc 'h3=":443"; ma=86400' always;
+        add_header Cache-Control "public, immutable";
+        gzip on;
+        gzip_comp_level 6;
+    }
+
+    # API Directus / CMS
+    location /api/cms/assets/ {
+        proxy_pass http://localhost:8055/assets/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+
+        expires 1y;
+        add_header Alt-Svc 'h3=":443"; ma=86400' always;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Прокси на Node.js (Nuxt SSR)
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+
+        add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    }
+
+    # SSL настройки основного домена
+    ssl_certificate /etc/letsencrypt/live/yourdomain.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.ru/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+```
+
+:::
+
+### cms.yourdomain.ru.conf
+
+::: details
+
+```txt
+# Путь для файлов кэша nginx
+proxy_cache_path /var/cache/nginx/directus_assets
+                 levels=1:2
+                 keys_zone=directus_assets:50m
+                 max_size=2g
+                 inactive=30d
+                 use_temp_path=off;
+
+# HTTPS без www
+server {
+    server_name cms.yourdomain.ru;
+
+    client_max_body_size 5M; # ограничение размера на загрузку файлов в админке directus
+
+    # Кэш для изображений
+    location /assets/ {
+        proxy_pass http://localhost:8055;
+        proxy_http_version 1.1;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        proxy_cache directus_assets;
+        proxy_cache_valid 200 30d;
+        proxy_cache_valid 404 1m;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_cache_background_update on;
+        proxy_cache_lock on;
+
+        proxy_ignore_headers Set-Cookie Cache-Control;
+        proxy_hide_header Set-Cookie;
+
+        add_header X-Cache-Status $upstream_cache_status always;
+        add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    }
+
+    location / {
+        proxy_pass http://localhost:8055;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    }
+
+    listen 443 ssl;
+    listen 443 quic reuseport;
+    http2 on;
+    ssl_certificate /etc/letsencrypt/live/yourdomain.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.ru/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+# Редирект с HTTPS www на HTTPS без www
+server {
+    listen 443 ssl;
+    listen 443 quic;
+    server_name www.cms.yourdomain.ru;
+
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+
+    ssl_certificate /etc/letsencrypt/live/yourdomain.ru/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.ru/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    return 301 https://cms.yourdomain.ru$request_uri;
+}
+
+# Редирект с HTTP на HTTPS без www
+server {
+    listen 80;
+    listen [::]:80;
+    server_name cms.yourdomain.ru www.cms.yourdomain.ru;
+
+    return 301 https://cms.yourdomain.ru$request_uri;
+}
+```
+
+:::
+
+<br>
+
+::: tip
+Не забыть заменить заглушки на реальный домен и путь к папке проекта
+:::
 
 ## Возможные ошибки
 
