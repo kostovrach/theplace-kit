@@ -7,7 +7,7 @@ export default defineConfig({
 	title: 'ThePlace-kit',
 	description: 'Библиотека компонентов и архитектурных решений на базе Nuxt и Directus',
 	head: [
-		['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+		['link', { rel: 'icon', type: 'image/svg+xml', href: '/theplace-kit/logo.svg' }],
 		['meta', { property: 'og:title', content: 'ThePlace-kit' }],
 		['meta', { property: 'og:description', content: 'Библиотека компонентов и архитектурных решений на базе Nuxt и Directus' }],
 	],
