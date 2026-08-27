@@ -32,7 +32,7 @@ export default defineConfig({
 					{ text: 'PWA', link: '/pwa' },
 				],
 			},
-			{ text: 'v4.0.0', link: '' },
+			{ text: 'v4.0.1', link: '' },
 		],
 
 		sidebar: [
