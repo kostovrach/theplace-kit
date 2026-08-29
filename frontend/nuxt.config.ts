@@ -5,6 +5,9 @@ export default defineNuxtConfig({
     typescript: {
         strict: true,
         typeCheck: 'build',
+        tsConfig: {
+            include: ['../scripts/**/*.ts'],
+        },
     },
 
     experimental: {
