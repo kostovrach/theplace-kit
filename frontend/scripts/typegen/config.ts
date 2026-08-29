@@ -12,8 +12,7 @@ export const CONFIG = {
     FILE_HEADER: '// Auto-generated. Do not edit.',
 
     /** Строка экспорта системных коллекций из SDK */
-    SYSTEM_COLLECTIONS:
-        "export type { DirectusUser, DirectusFile, DirectusCollection, DirectusRole } from '@directus/sdk';",
+    SYSTEM_COLLECTIONS: "export type { DirectusUser, DirectusFile, DirectusCollection, DirectusRole, DirectusField, DirectusPermission, DirectusFolder, DirectusAccess, DirectusFlow, DirectusSettings, DirectusShare, DirectusPolicy, DirectusVersion, DirectusDashboard, DirectusRelation, DirectusClient, DirectusTranslation, DirectusActivity, DirectusWebhook, DirectusApiError, DirectusComment, DirectusError, DirectusExtension, DirectusNotification, DirectusOperation, DirectusPanel, DirectusPreset, DirectusRevision } from '@directus/sdk';",
 
     /** Строка экспорта словаря всех коллекций */
     COLLECTION_MAP: 'export type CollectionNameType = keyof Schema;',

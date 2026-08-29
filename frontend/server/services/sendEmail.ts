@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 
-import { getDirectusCollection } from '~~/server/services/serverCms';
+// import { getDirectusCollection } from '~~/server/services/serverCms';
 
-import type { ISettings } from '~~/shared/types/settings';
+// import type { ISettings } from '~~/shared/types/settings';
 import type { IEmailRequest } from '~~/shared/types/entities/request';
 
 const config = useRuntimeConfig();
@@ -55,7 +55,7 @@ export async function sendEmail(
 
     try {
         /** Коллекция настроек сайта из `Directus` */
-        const settings = await getDirectusCollection<ISettings>('settings');
+        // const settings = await getDirectusCollection<ISettings>('settings');
         /** HTML шаблон письма */
         const template = `
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -130,21 +130,21 @@ export async function sendEmail(
          *
          * TODO: Сделать отправку в виде рассылки вместо цикла
          */
-        for (const target of settings.request_targets) {
-            const mailOptions: Mail.Options = {
-                from: 'Заявка',
-                to: replaceSpaces(target.email),
-                subject: 'Заявка с сайта',
-                html: template,
-            };
+        // for (const target of settings.request_targets) {
+        //     const mailOptions: Mail.Options = {
+        //         from: 'Заявка',
+        //         to: replaceSpaces(target.email),
+        //         subject: 'Заявка с сайта',
+        //         html: template,
+        //     };
 
-            const res = await transporter.sendMail(mailOptions);
+        //     const res = await transporter.sendMail(mailOptions);
 
-            if (isDev) {
-                /** Логирование ссылки на превью, если среда dev */
-                console.log('Preview URL:', nodemailer.getTestMessageUrl(res));
-            }
-        }
+        //     if (isDev) {
+        //         /** Логирование ссылки на превью, если среда dev */
+        //         console.log('Preview URL:', nodemailer.getTestMessageUrl(res));
+        //     }
+        // }
 
         return {
             status: 200,

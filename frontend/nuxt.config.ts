@@ -35,8 +35,8 @@ export default defineNuxtConfig({
 
     runtimeConfig: {
         public: {
-            cmsUrl: process.env.DIRECTUS_URL || 'empty',
-            siteUrl: process.env.SITE_URL || 'empty',
+            cmsUrl: process.env.DIRECTUS_URL || '',
+            siteUrl: process.env.SITE_URL || '',
 
             /** dev / prod */
             appEnv: process.env.APP_ENV || 'dev',
@@ -51,15 +51,15 @@ export default defineNuxtConfig({
         },
         directus: {
             url: process.env.DIRECTUS_URL || '',
-            readToken: process.env.DIRECTUS_READ_TOKEN || 'empty',
-            crudToken: process.env.DIRECTUS_CRUD_TOKEN || 'empty',
+            token: process.env.DIRECTUS_TOKEN || '',
+            webhookSecret: process.env.DIRECTUS_WEBHOOK_SECRET || ''
         },
         smtp: {
-            host: process.env.SMTP_HOST || 'empty',
+            host: process.env.SMTP_HOST || '',
             port: process.env.SMTP_PORT || '465',
-            user: process.env.SMTP_USER || 'empty',
-            pass: process.env.SMTP_PASS || 'empty',
-            target: process.env.SMTP_ORDERS_TARGET || 'empty',
+            user: process.env.SMTP_USER || '',
+            pass: process.env.SMTP_PASS || '',
+            target: process.env.SMTP_ORDERS_TARGET || '',
         },
     },
 
@@ -74,7 +74,7 @@ export default defineNuxtConfig({
     },
 
     yandexMaps: {
-        apikey: process.env.YANDEX_API_KEY || 'empty',
+        apikey: process.env.YANDEX_API_KEY || '',
         strictMode: true,
         lang: 'ru_RU',
         version: 'v3',

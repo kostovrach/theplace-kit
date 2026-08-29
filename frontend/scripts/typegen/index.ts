@@ -170,7 +170,7 @@ async function main() {
 
     console.log(
         CONFIG.LOG_PREFIX,
-        `Attempting to generate types from Directus: ${styleText('cyan', DIRECTUS_URL)}`
+        `Attempting to generate types from Directus via URL: ${styleText('cyan', DIRECTUS_URL)}`
     );
 
     try {

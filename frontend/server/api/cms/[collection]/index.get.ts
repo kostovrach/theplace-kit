@@ -1,67 +1,110 @@
-import { fetchCollection } from '../../../services/directus/data';
+import { getDirectusCollection } from '~~/server/services/directus/core';
+
+interface ICmsRequestQuery {
+    fields?: string;
+    relations?: string;
+    filter?: string;
+    sort?: string;
+    limit?: string | number;
+}
 
 export default defineCachedEventHandler(
-    async (event) => {
-        const config = useRuntimeConfig();
+    async (
+        event
+    ): Promise<{ success: boolean; data: unknown | null; status: number; message: string }> => {
+        /** Query параметры запроса */
+        const query = getQuery<ICmsRequestQuery>(event);
+
+        /** Параметр collection из запроса */
+        const { collection } = getRouterParams(event);
+        if (!collection) {
+            setResponseStatus(event, 400);
+            return {
+                success: false,
+                status: 400,
+                data: null,
+                message: 'Parameter "collection" is required',
+            };
+        }
 
         try {
-            let q: Record<string, string> = {};
-            const url = event.node.req.url;
-            if (url) {
-                const parsed = new URL(url, config.public.siteUrl);
-                q = Object.fromEntries(parsed.searchParams.entries());
-            }
-
-            const { collection } = getRouterParams(event);
-            if (!collection) {
-                event.node.res.statusCode = 400;
-                return { data: null, error: 'collection is required' };
-            }
-
+            /** Парсинг полей (fields) */
             let fields: string[] | undefined;
-            if (q.fields) {
-                try {
-                    const raw = String(q.fields);
-                    if (raw.trim().startsWith('[')) fields = JSON.parse(raw);
-                    else
-                        fields = raw
-                            .split(',')
-                            .map((s) => s.trim())
-                            .filter(Boolean);
-                } catch {}
-            }
-
-            let relations: string[] | undefined;
-            if (q.relations)
-                relations = String(q.relations)
-                    .split(',')
-                    .map((s) => s.trim())
-                    .filter(Boolean);
-
-            let filter: any | undefined;
-            if (q.filter) {
-                try {
-                    filter = typeof q.filter === 'string' ? JSON.parse(q.filter) : q.filter;
-                } catch {
-                    event.node.res.statusCode = 400;
-                    return { data: null, error: 'invalid filter JSON' };
+            if (query.fields) {
+                const rawFields = query.fields.trim();
+                if (rawFields.startsWith('[')) {
+                    try {
+                        fields = JSON.parse(rawFields);
+                    } catch {}
+                } else {
+                    fields = rawFields
+                        .split(',')
+                        .map((s) => s.trim())
+                        .filter(Boolean);
                 }
             }
 
-            const sort = q.sort ? String(q.sort) : undefined;
-            const limit = q.limit !== undefined ? Number(q.limit) : -1;
+            /** Парсинг связей (relations) */
+            const relations = query.relations
+                ? query.relations
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter(Boolean)
+                : [];
 
-            const params = { fields: fields ?? ['*', ...(relations ?? [])], filter, sort, limit };
+            /** Парсинг фильтров (filter) */
+            let filter: Record<string, unknown> | undefined;
+            if (query.filter) {
+                try {
+                    filter =
+                        typeof query.filter === 'string' ? JSON.parse(query.filter) : query.filter;
+                } catch {
+                    throw createError({
+                        status: 400,
+                        message: 'Invalid filter JSON syntax',
+                    });
+                }
+            }
 
-            const data = await fetchCollection(collection, params);
+            /** Парсинг лимита (limit) */
+            const limit = query.limit !== undefined ? Number(query.limit) : -1;
 
-            return { data };
+            const params = {
+                fields: fields ?? ['*', ...(relations ?? [])],
+                filter,
+                sort: query.sort,
+                limit,
+            };
+
+            /** Каст к any, поскольку в динамическом HTTP-API невозможно передать generic, рассчет на корректную типизацию клиента */
+            const data = await getDirectusCollection(
+                collection as CollectionNameType,
+                params as any
+            );
+
+            return { success: true, status: 200, data, message: 'OK' };
         } catch (err: any) {
             console.error('[api/cms] error', err);
 
-            event.node.res.statusCode = 500;
-            return { data: null, error: String(err?.message || err) };
+            setResponseStatus(event, 500);
+            return {
+                success: false,
+                status: 500,
+                data: null,
+                message: String(err?.message ?? err),
+            };
         }
     },
-    { maxAge: 60 }
+    {
+        // Имя обработчика
+        name: 'get-cms-collection',
+        // Ключ кэша запроса
+        getKey: (event) => {
+            const collection = getRouterParam(event, 'collection');
+            return `collection-${collection}`;
+        },
+        // Кэш на 24 часа
+        // Если контент поменяется в CMS, вебхук Directus сбросит этот кэш досрочно
+        maxAge: 60 * 60 * 24,
+    }
 );
