@@ -1,7 +1,6 @@
 import { readItems, readSingleton } from '@directus/sdk';
 import { directus } from '~~/server/services/directus/client';
 
-import type { ICmsResponse } from '~~/server/types/cms';
 import type { Query, UnpackList } from '@directus/sdk';
 
 export default defineCachedEventHandler(

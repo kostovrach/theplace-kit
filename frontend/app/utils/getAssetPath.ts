@@ -5,7 +5,7 @@
  * @param domain - опциональный параметр для ручной передачи домена CMS (используется в случаях, когда в процессе выполнения функции теряется контекст nuxt)
  * @returns абсолютный путь к файлу из библиотеки Directus (`<домен_directus>/assets/<uuid.расширение>?<query_парметры>`)
  */
-export function getAssetPath(file: IDirectusFile, query?: string, domain?: string) {
+export function getAssetPath(file: DirectusFile, query?: string, domain?: string) {
     /** для dev */
     // return String(file.id);
 
@@ -14,7 +14,7 @@ export function getAssetPath(file: IDirectusFile, query?: string, domain?: strin
     function getQuery() {
         let q = '';
 
-        if (file.type.startsWith('image/') && file.type !== 'image/svg') {
+        if (file.type && file.type.startsWith('image/') && file.type !== 'image/svg') {
             q += '?format=webp';
 
             if (query) {

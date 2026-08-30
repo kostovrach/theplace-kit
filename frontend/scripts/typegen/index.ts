@@ -57,7 +57,15 @@ async function handleFallback() {
             `/** Fallback Empty Schema */`,
             `export interface Schema {}`,
             `/** Collections map */`,
-            `${CONFIG.COLLECTION_MAP}`,
+            `export type CollectionNameType = keyof Schema\n`,
+            `/** Only regular Directus collections */`,
+            `export type RegularCollectionType = RegularCollections<Schema>;\n`,
+            `/** Only singleton Directus collections */`,
+            `export type SingletonCollectionType = SingletonCollections<Schema>;\n`,
+            `/** Regular collections (array types) */`,
+            `export const regularCollections = new Set<RegularCollectionType>([]);\n`,
+            `/** Singleton collections (non-array types) */`,
+            `export const singletonCollections = new Set<SingletonCollectionType>([]);\n`,
         ].join('\n');
 
         await ensureDir(CONFIG.OUT_DIR);
@@ -196,7 +204,7 @@ async function writeOutputs(
         `${CONFIG.SYSTEM_COLLECTIONS}\n`,
         `${collectionExports.join('\n')}\n`,
         `/** Collections map */`,
-        `${CONFIG.COLLECTION_MAP}\n`,
+        `export type CollectionNameType = keyof Schema\n`,
         `/** Only regular Directus collections */`,
         `export type RegularCollectionType = RegularCollections<Schema>;\n`,
         `/** Only singleton Directus collections */`,
@@ -206,7 +214,9 @@ async function writeOutputs(
             .map((c) => `'${c}'`)
             .join(', ')}]);\n`,
         `/** Singleton collections (non-array types) */`,
-        `export const singletonCollections = new Set<SingletonCollectionType>([${[...singletonCollections]
+        `export const singletonCollections = new Set<SingletonCollectionType>([${[
+            ...singletonCollections,
+        ]
             .map((c) => `'${c}'`)
             .join(', ')}]);\n`,
     ].join('\n');
