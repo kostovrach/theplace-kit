@@ -1,5 +1,3 @@
-import type { ICmsQuery } from '~~/server/types/cms';
-
 export function parseCmsQuery(raw: Record<string, string | string[] | undefined>): ICmsQuery {
     const result: ICmsQuery = {};
 

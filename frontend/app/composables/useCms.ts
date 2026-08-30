@@ -2,104 +2,166 @@ import type { AsyncDataOptions, AsyncDataRequestStatus } from '#app';
 import type { Query, UnpackList } from '@directus/sdk';
 
 /**
- * Alias for the standard Directus SDK query type,
- * bound to a specific schema collection.
- * @template C - Collection name from `Schema`
+ * Алиас стандартного query-типа Directus SDK
+ * с привязкой к конкретной коллекции схемы.
+ ** @template C - Имя коллекции из `Schema`
  */
 type LocalQueryType<C extends CollectionNameType> = Query<Schema, UnpackList<Schema[C]>>;
 
 /**
- * Parameters for requests to the Directus server proxy.
- * Mirrors the main `Query` fields from `@directus/sdk`, bound to a specific collection.
- * @template C - Collection name from `Schema`
+ * Параметры запроса к серверному proxy Directus.
+ * Повторяют основные поля `Query` из `@directus/sdk` с привязкой к коллекции.
+ * @template C - Имя коллекции из `Schema`
  */
 interface IUseCmsParams<C extends CollectionNameType> {
     /**
-     * List of fields to return.
-     * Supports object syntax for nested relations.
+     * Список полей в формате Directus SDK (объектный или строковый синтаксис).
+     *
+     * Имеет **наивысший приоритет**: если передан, параметр `relations` игнорируется.
      * @example
      * ['*', { cover: ['*'], author: ['id', 'name'] }]
      */
     fields?: LocalQueryType<C>['fields'];
 
     /**
-     * Record filter (`Directus Filter` syntax).
+     * Синтаксический сахар для вложенных связей.
+     *
+     * Принимает массив строк в точечной нотации.
+     * Парсится в `fields: ['*', ...relations]`.
+     *
+     * Поддерживает несколько полей через запятую в одном элементе:
+     * `'blocks.item.file.id,title'` => `['blocks.item.file.id', 'blocks.item.file.title']`.
+     *
+     * **Игнорируется, если одновременно передан `fields`**.
+     *
+     * @example
+     * ['cover.*', 'blocks.*', 'blocks.item.*', 'blocks.item.image.*']
+     * @example
+     * ['author.id,name', 'cover.*']
+     */
+    relations?: string[];
+
+    /**
+     * Фильтр записей (синтаксис `Directus Filter`).
      * @example
      * { status: { _eq: 'published' } }
      */
     filter?: LocalQueryType<C>['filter'];
 
     /**
-     * Sort order.
-     * The `-` prefix indicates descending order.
+     * Сортировка.
+     * Префикс `-` означает сортировку по убыванию.
      * @example
      * ['-date_created', 'title']
      */
     sort?: LocalQueryType<C>['sort'];
 
     /**
-     * Maximum number of items to return.
-     * - `-1`: no limit (Directus behavior).
+     * Ограничение количества возвращаемых элементов.
+     * - `-1`: без ограничения (поведение Directus).
      */
     limit?: number;
 
     /**
-     * Offset from the beginning of the result set (pagination).
+     * Смещение от начала выборки (пагинация).
      */
     offset?: number;
 
     /**
-     * Page number (alternative to `offset`).
-     * - Calculation: `offset = (page - 1) * limit`
+     * Номер страницы (альтернатива `offset`).
+     * - Формула рассчета: `offset = (page - 1) * limit`
      */
     page?: number;
 
     /**
-     * Full-text search across the collection's searchable fields.
+     * Текстовый поиск по searchable-полям коллекции.
      */
     search?: string;
 
     /**
-     * Parameters for filtering, sorting, and limiting nested relations.
+     * Параметры для фильтрации / сортировки / лимита на уровне вложенных связей.
      */
     deep?: LocalQueryType<C>['deep'];
 }
 
 /**
- * Unified composable response.
- * @template T - Type of data expected in `content`
+ * Унифицированный результат работы composable.
+ * @template T - Тип данных, которые ожидаются в `content`
  */
 interface IUseCmsResponse<T> {
     /**
-     * Reactive collection, item, or singleton data. `null` when:
-     * - the request has not completed yet;
-     * - the request failed;
-     * - the API returned `success: false`.
+     * Реактивные данные коллекции / элемента / singleton. `null` в случае, если:
+     * - запрос еще не завершен;
+     * - запрос завершен с ошибкой;
+     * - API вернуло `success: false`.
      */
     content: Ref<T | null>;
 
     /**
-     * Error message, if any, or `null`.
+     * Текст ошибки, при наличии, или `null`.
      */
     error: Ref<string | null>;
 
     /**
-     * Current request status (`idle` | `pending` | `success` | `error`).
+     * Текущий статус запроса (`idle` | `pending` | `success` | `error`).
      */
     status: Ref<AsyncDataRequestStatus>;
 
     /**
-     * Force the request to be executed again.
+     * Принудительно повторно выполнить запрос.
      */
     refresh: () => Promise<void>;
 }
 
 /**
- * Converts typed SDK query parameters into a string representation
- * for an HTTP request to `/api/cms/...`.
- * @template C - Collection name
- * @param params - Request parameters
- * @returns An object ready to be passed to `$fetch` as `query`
+ * Разворачивает строки `relations` в плоский список field-путей.
+ *
+ * - Поддерживает точечную нотацию: `blocks.item.image.*`
+ * - Поддерживает несколько полей через запятую: `file.id,title`
+ *   => `['file.id', 'file.title']` (общий префикс сохраняется)
+ *
+ * @param relations - Массив строк связей
+ * @returns Плоский массив field-путей
+ */
+function parseRelations(relations: string[]): string[] {
+    const result: string[] = [];
+
+    for (const raw of relations) {
+        const parts = raw
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        if (parts.length === 0) continue;
+
+        if (parts.length === 1) {
+            result.push(parts[0]!);
+            continue;
+        }
+
+        const first = parts[0]!;
+        const lastDot = first.lastIndexOf('.');
+
+        if (lastDot === -1) {
+            result.push(...parts);
+        } else {
+            const prefix = first.slice(0, lastDot + 1);
+            const firstLeaf = first.slice(lastDot + 1);
+
+            result.push(prefix + firstLeaf);
+            for (let i = 1; i < parts.length; i++) {
+                result.push(prefix + parts[i]);
+            }
+        }
+    }
+
+    return result;
+}
+
+/**
+ * Преобразование типизированных query-параметров SDK в строку для HTTP-запроса к `/api/cms/...`.
+ * @template C - Имя коллекции
+ * @param params - Параметры запроса
+ * @returns Объект, готовый к передаче в `$fetch` как `query`
  */
 function buildQuery<C extends CollectionNameType>(
     params: IUseCmsParams<C> = {}
@@ -108,6 +170,9 @@ function buildQuery<C extends CollectionNameType>(
 
     if (params.fields !== undefined) {
         query.fields = JSON.stringify(params.fields);
+    } else if (params.relations !== undefined && params.relations.length > 0) {
+        const parsedRelations = parseRelations(params.relations);
+        query.fields = JSON.stringify(['*', ...parsedRelations]);
     }
     if (params.filter !== undefined) {
         query.filter = JSON.stringify(params.filter);
@@ -135,13 +200,13 @@ function buildQuery<C extends CollectionNameType>(
 }
 
 /**
- * Creates a fetcher for `useAsyncData`.
- * Returns a function that performs a `$fetch` request to the specified URL.
+ * Фабрика обработчика для `useAsyncData`.
+ * Создает функцию, которая выполняет `$fetch` к указанному URL.
  *
- * @template T - Expected data type inside `ICmsResponse`
- * @param url - API endpoint (`/api/cms/...`)
- * @param query - Query parameters
- * @returns An async function returning `ICmsResponse<T>`
+ * @template T - Ожидаемый тип данных внутри `ICmsResponse`
+ * @param url - Endpoint API (`/api/cms/...`)
+ * @param query - Query-параметры
+ * @returns Async-функция, возвращающая `ICmsResponse<T>`
  */
 function createCmsFetcher<T>(url: string, query: Record<string, string>) {
     return async (): Promise<ICmsResponse<T>> => {
@@ -150,14 +215,22 @@ function createCmsFetcher<T>(url: string, query: Record<string, string>) {
 }
 
 /**
- * Main composable for fetching Directus data through Nuxt API routes.
+ * Основной composable для чтения данных из Directus через Nuxt API-роуты.
  *
- * Provides three methods:
- * - `collection` - list of items from a regular collection     (array)
- * - `singleton`  - singleton collection                        (object)
- * - `item`       - single item from a regular collection by ID (object)
+ * Предоставляет три метода:
+ * - `collection` - список элементов regular-коллекции      (массив)
+ * - `singleton`  - singleton-коллекция                     (объект)
+ * - `item`       - один элемент regular-коллекции по ID    (объект)
  *
  * @example
+ * // С использванием relations (сахар)
+ * const { content } = await useCms().collection('articles', {
+ *   relations: ['cover.*', 'blocks.*', 'blocks.item.*', 'blocks.item.image.*'],
+ *   filter: { published: { _eq: true } },
+ * });
+ *
+ * @example
+ * С использованием fields (полный контроль)
  * const { content, error } = await useCms().collection('articles', {
  *   fields: ['id', 'title', { author: ['name'] }],
  *   filter: { status: { _eq: 'published' } },
@@ -173,13 +246,13 @@ export function useCms() {
 }
 
 /**
- * Fetches a list of items from a regular collection.
+ * Получение списка элементов regular-коллекции.
  *
- * @template C - Regular collection name
- * @param collection - Collection name
- * @param params - Request parameters (`IUseCmsParams`)
- * @param requestOpts - `useAsyncData` options (lazy, server, immediate, watch…)
- * @returns An object containing `content`, `error`, `status`, and `refresh`
+ * @template C - Имя regular-коллекции
+ * @param collection - Название коллекции
+ * @param params - Параметры запроса (`IUseCmsParams`)
+ * @param requestOpts - Опции `useAsyncData` (lazy, server, immediate, watch…)
+ * @returns Объект с `content`, `error`, `status` и `refresh`
  *
  * @example
  * const { content, error } = await useCms().collection('articles', {
@@ -218,13 +291,13 @@ async function useCmsCollection<C extends RegularCollectionType>(
 }
 
 /**
- * Fetches a singleton collection.
+ * Получение singleton-коллекции.
  *
- * @template C - Singleton collection name
- * @param collection - Collection name
- * @param params - Request parameters (`IUseCmsParams`)
- * @param requestOpts - `useAsyncData` options (lazy, server, immediate, watch…)
- * @returns An object containing `content`, `error`, `status`, and `refresh`
+ * @template C - Имя singleton-коллекции
+ * @param collection - Название коллекции
+ * @param params - Параметры запроса (`IUseCmsParams`)
+ * @param requestOpts - Опции `useAsyncData` (lazy, server, immediate, watch…)
+ * @returns Объект с `content`, `error`, `status` и `refresh`
  *
  * @example
  * const { content } = await useCms().singleton('home_page', {
@@ -261,14 +334,14 @@ async function useCmsSingleton<C extends SingletonCollectionType>(
 }
 
 /**
- * Fetches a single item from a regular collection by ID.
+ * Получение одного элемента regular-коллекции по ID.
  *
- * @template C - Regular collection name
- * @param collection - Collection name
- * @param id - Item primary key
- * @param params - Request parameters (`IUseCmsParams`)
- * @param requestOpts - `useAsyncData` options (lazy, server, immediate, watch…)
- * @returns An object containing `content`, `error`, `status`, and `refresh`
+ * @template C - Имя regular-коллекции
+ * @param collection - Название коллекции
+ * @param id - Primary key элемента
+ * @param params - Параметры запроса (`IUseCmsParams`)
+ * @param requestOpts - Опции `useAsyncData` (lazy, server, immediate, watch…)
+ * @returns Объект с `content`, `error`, `status` и `refresh`
  *
  * @example
  * const { content } = await useCms().item('articles', 'uuid-or-id', {
