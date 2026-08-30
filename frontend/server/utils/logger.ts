@@ -43,5 +43,5 @@ export function logger(
     if (LOG_LEVEL === 'WARN' && level === 'log') return;
     if (LOG_LEVEL === 'ERROR' && (level === 'log' || level === 'warn')) return;
 
-    console.log(`[${getFormattedTime()}]`, displayLevel, `[${prefix}]:`, ...args);
+    console[level](`[${getFormattedTime()}]`, displayLevel, `[${prefix}]:`, ...args);
 }

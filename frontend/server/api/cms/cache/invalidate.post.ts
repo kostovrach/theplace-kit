@@ -30,20 +30,18 @@ export default defineEventHandler(
         try {
             /** Глобальное хранилище кэша Nuxt */
             const cache = useStorage('cache');
-            /**
-             * Ключ формируется по шаблону `[группа]:[имя]:[ключ_запроса].json`
-             * - Пространство имен: `nitro:handlers`
-             * - Имя обработчика: `get-cms-collection`
-             * - Ключ запроса: `collection-${collection}`
-             */
-            const key = `nitro:handlers:get-cms-collection:collection-${collection}.json`;
+            /** Ключи, начинающиеся с `nitro:handlers:cms` */
+            const allKeys = await cache.getKeys('nitro:handlers:cms');
 
-            await cache.removeItem(key);
+            /** Шаблон ключа: `[группа]:[имя]:[ключ_запроса].json` */
+            const keysToRemove = allKeys.filter((key) => key.includes(`collection-${collection}`));
+
+            await Promise.all(keysToRemove.map((key) => cache.removeItem(key)));
 
             logger(
                 'warn',
                 LOG_PREFIX,
-                `Successfully cleared cache for collection: "${collection}"`
+                `Successfully cleared ${keysToRemove.length} cache entries for collection: "${collection}"`
             );
 
             setResponseStatus(event, 200);

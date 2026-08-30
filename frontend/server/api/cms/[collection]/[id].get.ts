@@ -1,91 +1,59 @@
-import { getDirectusItem } from '~~/server/services/directus/core';
+import { readItem } from '@directus/sdk';
+import { directus } from '~~/server/services/directus/client';
 
-interface ICmsRequestQuery {
-    fields?: string;
-    relations?: string;
-    filter?: string;
-    sort?: string;
-}
+import type { ICmsResponse } from '~~/server/types/cms';
+import type { Query, UnpackList } from '@directus/sdk';
 
 export default defineCachedEventHandler(
-    async (
-        event
-    ): Promise<{ success: boolean; data: unknown | null; status: number; message: string }> => {
-        /** Query параметры запроса */
-        const query = getQuery<ICmsRequestQuery>(event);
+    async (event): Promise<ICmsResponse> => {
+        const collection = getRouterParam(event, 'collection');
+        const id = getRouterParam(event, 'id');
 
-        /** Параметры collection и id из запроса */
-        const { collection, id } = getRouterParams(event);
-        if (!collection || !id) {
-            setResponseStatus(event, 400);
-            return {
-                success: false,
+        /**
+         * Проверка наличия ключа коллекции
+         * и его соответствия названию любой из регулярных или singleton коллекций.
+         * В ином случае функция пробросит ошибку
+         */
+        assertCollection(collection);
+
+        if (!id || !id.length) {
+            throw createError({
                 status: 400,
-                data: null,
-                message: 'Parameters "collection" & "id" is required',
-            };
+                message: 'Parameter "id" is required',
+            });
         }
 
-        try {
-            /** Парсинг полей (fields) */
-            let fields: string[] | undefined;
-            if (query.fields) {
-                const rawFields = query.fields.trim();
-                if (rawFields.startsWith('[')) {
-                    try {
-                        fields = JSON.parse(rawFields);
-                    } catch {}
-                } else {
-                    fields = rawFields
-                        .split(',')
-                        .map((s) => s.trim())
-                        .filter(Boolean);
-                }
-            }
+        const query = parseCmsQuery(getQuery(event));
 
-            /** Парсинг связей (relations) */
-            const relations = query.relations
-                ? query.relations
-                      .split(',')
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                : [];
-
-            /** Парсинг фильтров (filter) */
-            let filter: Record<string, unknown> | undefined;
-            if (query.filter) {
-                try {
-                    filter =
-                        typeof query.filter === 'string' ? JSON.parse(query.filter) : query.filter;
-                } catch {
-                    throw createError({
-                        status: 400,
-                        message: 'Invalid filter JSON syntax',
-                    });
-                }
-            }
-
-            const params = {
-                fields: fields ?? ['*', ...(relations ?? [])],
-                filter,
-                sort: query.sort,
-            };
-
-            /** Каст к any, поскольку в динамическом HTTP-API невозможно передать generic, рассчет на корректную типизацию клиента */
-            const data = await getDirectusItem(collection as any, id, params);
-
-            return { success: true, status: 200, data, message: 'OK' };
-        } catch (err: any) {
-            console.error('[api/cms/item] error', err);
-
-            setResponseStatus(event, 500);
-            return {
-                success: false,
-                status: 500,
-                data: null,
-                message: String(err?.message ?? err),
-            };
+        /** Если переданный ключ является ключом регулярной коллекции */
+        if (isRegularCollection(collection)) {
+            const res = await directus.request<Schema[typeof collection]>(
+                readItem(
+                    collection,
+                    id,
+                    query as Query<Schema, UnpackList<Schema[typeof collection]>>
+                )
+            );
+            return { success: true, status: 200, data: res, message: 'OK' };
+        } else {
+            throw createError({
+                status: 400,
+                message: 'Parameter "collection" must be the name of regular collection',
+            });
         }
     },
-    { maxAge: 60 }
+    {
+        // Имя обработчика
+        name: 'cms-get-item',
+        // Ключ кэша запроса
+        getKey: (event) => {
+            const collection = getRouterParam(event, 'collection');
+            const id = getRouterParam(event, 'id');
+            const query = getQuery(event);
+            return `collection-${collection}-item-${id}-${event.method}-${JSON.stringify(query)}`;
+        },
+        // Кэш на 24 часа
+        // Если контент поменяется в CMS, вебхук Directus сбросит этот кэш досрочно
+        maxAge: 60 * 60 * 24,
+    }
 );

@@ -119,10 +119,56 @@ function splitContent(raw: string): { interfaces: Record<string, string> } {
 }
 
 /**
+ * Извлечение названия коллекций из интерфейса Schema.
+ * - regular: значение имеет вид `SomeType[]`
+ * - singleton: значение без `[]`
+ */
+function extractCollections(raw: string): {
+    regularCollections: Set<string>;
+    singletonCollections: Set<string>;
+} {
+    const regularCollections = new Set<string>();
+    const singletonCollections = new Set<string>();
+
+    const schemaMatch = raw.match(/export\s+interface\s+Schema\s*\{([\s\S]*?)\n\}/);
+
+    if (!schemaMatch?.[1]) {
+        return { regularCollections, singletonCollections };
+    }
+
+    const body = schemaMatch[1];
+
+    // Каждая строка вида:  name: Type;   или   name: Type[];
+    const fieldRe = /^\s*([a-zA-Z0-9_]+)\s*:\s*([^;]+);/gm;
+
+    let m: RegExpExecArray | null;
+    while ((m = fieldRe.exec(body)) !== null) {
+        const [, name, typeStr] = m;
+        if (!name || !typeStr) continue;
+
+        const isArray = /\[\]\s*$/.test(typeStr.trim());
+
+        if (isArray) {
+            regularCollections.add(name);
+        } else {
+            singletonCollections.add(name);
+        }
+    }
+
+    return { regularCollections, singletonCollections };
+}
+
+/**
  * Запись файлов
  * @param interfaces объект, где ключ - имя интерфейса и значение - тип
+ * @param regularCollections словарь регулярных коллекций
+ * @param singletonCollections словарь singleton коллекций
  */
-async function writeOutputs(interfaces: Record<string, string>) {
+async function writeOutputs(
+    interfaces: Record<string, string>,
+    regularCollections: Set<string>,
+    singletonCollections: Set<string>
+) {
     await rimrafTs(CONFIG.COLLECTIONS_DIR);
 
     const collectionExports: string[] = [];
@@ -150,7 +196,19 @@ async function writeOutputs(interfaces: Record<string, string>) {
         `${CONFIG.SYSTEM_COLLECTIONS}\n`,
         `${collectionExports.join('\n')}\n`,
         `/** Collections map */`,
-        `${CONFIG.COLLECTION_MAP}`,
+        `${CONFIG.COLLECTION_MAP}\n`,
+        `/** Only regular Directus collections */`,
+        `export type RegularCollectionType = RegularCollections<Schema>;\n`,
+        `/** Only singleton Directus collections */`,
+        `export type SingletonCollectionType = SingletonCollections<Schema>;\n`,
+        `/** Regular collections (array types) */`,
+        `export const regularCollections = new Set<RegularCollectionType>([${[...regularCollections]
+            .map((c) => `'${c}'`)
+            .join(', ')}]);\n`,
+        `/** Singleton collections (non-array types) */`,
+        `export const singletonCollections = new Set<SingletonCollectionType>([${[...singletonCollections]
+            .map((c) => `'${c}'`)
+            .join(', ')}]);\n`,
     ].join('\n');
 
     await fs.writeFile(path.join(CONFIG.OUT_DIR, CONFIG.INDEX_FILE), index, 'utf-8');
@@ -190,7 +248,8 @@ async function main() {
 
         /** Разделение по файлам */
         const { interfaces } = splitContent(raw);
-        await writeOutputs(interfaces);
+        const { regularCollections, singletonCollections } = extractCollections(raw);
+        await writeOutputs(interfaces, regularCollections, singletonCollections);
     } catch (fsOrParsingError) {
         console.error(
             CONFIG.ERR_PREFIX,
