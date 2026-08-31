@@ -18,7 +18,7 @@ export default defineNuxtConfig({
         preset: 'node-server',
     },
 
-    modules: ['@pinia/nuxt', '@vueuse/nuxt', '@vue-final-modal/nuxt', 'nuxt-svg-sprite-icon'],
+    modules: ['@pinia/nuxt', '@vueuse/nuxt', '@vue-final-modal/nuxt'],
 
     vite: {
         css: {
@@ -73,14 +73,6 @@ export default defineNuxtConfig({
 
     imports: {
         dirs: ['~/types/**'],
-    },
-
-    svgSprite: {
-        input: './app/assets/svg',
-        output: './app/assets/svg/gen',
-        defaultSprite: 'icons',
-        elementClass: 'icon',
-        optimize: false,
     },
 
     build: {
