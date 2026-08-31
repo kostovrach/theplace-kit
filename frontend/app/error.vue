@@ -1,9 +1,7 @@
 <template>
-    <NuxtLayout>
-        <section class="not-found">
-            <div class="not-found__container">Ошибка 404</div>
-        </section>
-    </NuxtLayout>
+    <section class="not-found">
+        <div class="not-found__container">Ошибка 404</div>
+    </section>
 </template>
 
 <script setup lang="ts">

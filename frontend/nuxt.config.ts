@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-    compatibilityDate: '2025-07-15',
+    compatibilityDate: '2026-08-31',
     ssr: true,
 
     typescript: {
@@ -18,18 +18,24 @@ export default defineNuxtConfig({
         preset: 'node-server',
     },
 
-    modules: [
-        '@pinia/nuxt',
-        'nuxt-svg-sprite-icon',
-        '@vueuse/nuxt',
-        '@primevue/nuxt-module',
-        '@vue-final-modal/nuxt',
-        'vue-yandex-maps/nuxt',
-    ],
+    modules: ['@pinia/nuxt', '@vueuse/nuxt', '@vue-final-modal/nuxt', 'nuxt-svg-sprite-icon'],
 
     vite: {
+        css: {
+            preprocessorOptions: {
+                scss: { additionalData: "@use '~/assets/scss/abstracts' as *;" },
+            },
+        },
         optimizeDeps: {
-            include: ['vue-final-modal'],
+            include: [
+                'vue-final-modal',
+                'embla-carousel-auto-height',
+                'embla-carousel-auto-scroll',
+                'embla-carousel-autoplay',
+                'embla-carousel-fade',
+                'embla-carousel-vue',
+                'embla-carousel-wheel-gestures',
+            ],
         },
     },
 
@@ -52,7 +58,7 @@ export default defineNuxtConfig({
         directus: {
             url: process.env.DIRECTUS_URL || '',
             token: process.env.DIRECTUS_TOKEN || '',
-            webhookSecret: process.env.DIRECTUS_WEBHOOK_SECRET || ''
+            webhookSecret: process.env.DIRECTUS_WEBHOOK_SECRET || '',
         },
         smtp: {
             host: process.env.SMTP_HOST || '',
@@ -65,20 +71,16 @@ export default defineNuxtConfig({
 
     css: ['vue-final-modal/style.css', '~/assets/css/main.css'],
 
+    imports: {
+        dirs: ['~/types/**'],
+    },
+
     svgSprite: {
         input: './app/assets/svg',
         output: './app/assets/svg/gen',
         defaultSprite: 'icons',
         elementClass: 'icon',
         optimize: false,
-    },
-
-    yandexMaps: {
-        apikey: process.env.YANDEX_API_KEY || '',
-        strictMode: true,
-        lang: 'ru_RU',
-        version: 'v3',
-        typesInjection: false,
     },
 
     build: {

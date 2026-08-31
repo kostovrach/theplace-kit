@@ -25,8 +25,6 @@
 </script>
 
 <style scoped lang="scss">
-    @use '~/assets/scss/abstracts' as *;
-
     .modal-menu {
         $p: &;
         $px: rem(32);

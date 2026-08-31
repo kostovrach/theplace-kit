@@ -5,27 +5,14 @@
         :throttle="200"
         :duration="2000"
     />
-
     <NuxtLayout>
         <NuxtPage />
     </NuxtLayout>
-
     <ModalsContainer />
-    <TheCookieNotify />
 </template>
 
 <script setup lang="ts">
-    import { ModalsContainer, useVfm } from 'vue-final-modal';
-
-    const router = useRouter();
-
-    /** закрытие всех модальных окон при клиентской навигации */
-    router.beforeEach((to, from) => {
-        if (to.path !== from.path) {
-            const { closeAll } = useVfm();
-            closeAll();
-        }
-    });
+    import { ModalsContainer } from 'vue-final-modal';
 
     // SEO & Meta ==================================================
     useHead({
@@ -44,8 +31,6 @@
 </script>
 
 <style lang="scss">
-    @use '~/assets/scss/abstracts' as *;
-
     :root {
         --loading-bar-color: #{$c-accent};
     }

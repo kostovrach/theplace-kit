@@ -1,21 +1,22 @@
 <template>
     <div
-        ref="emblaRef"
-        class="embla"
+        ref="carouselRef"
+        :class="['carousel', props.class]"
         :style="{ overflow: props.overflow }"
         @mouseenter="mouseEnterHandler"
         @touchstart="mouseEnterHandler"
         @mouseleave="mouseLeaveHandler"
         @touchend="mouseLeaveHandler"
+        v-bind="{ ...$attrs }"
     >
         <div
-            class="embla__container"
+            class="carousel__container"
             :style="{
                 padding: props.padding,
                 flexDirection: props.axis === 'x' ? 'row' : 'column',
                 gap: `${props.spaceBetween}px`,
                 height: props.axis === 'y' ? '100%' : 'fit-content',
-                // touchAction: props.axis === 'x' ? 'pan-x pinch-zoom' : 'pan-y pinch-zoom',
+                touchAction: props.axis === 'x' ? 'pan-y pinch-zoom' : 'pan-x pinch-zoom',
             }"
         >
             <slot></slot>
@@ -24,17 +25,19 @@
 </template>
 
 <script setup lang="ts">
-    import emblaCarouselVue from 'embla-carousel-vue';
-    import Autoplay from 'embla-carousel-autoplay';
+    import Embla from 'embla-carousel-vue';
     import Fade from 'embla-carousel-fade';
     import AutoHeight from 'embla-carousel-auto-height';
     import WheelGestures from 'embla-carousel-wheel-gestures';
+    import Autoplay, { type AutoplayOptionsType } from 'embla-carousel-autoplay';
     import AutoScroll, { type AutoScrollOptionsType } from 'embla-carousel-auto-scroll';
-    import type { AutoplayOptionsType } from 'embla-carousel-autoplay';
+
     import type { EmblaOptionsType, EmblaPluginType } from 'embla-carousel';
 
     const props = withDefaults(
         defineProps<{
+            class?: string | Record<string, unknown>;
+
             // state
             options?: EmblaOptionsType;
             padding?: string;
@@ -54,6 +57,8 @@
             stopScrollOnHover?: boolean;
         }>(),
         {
+            class: '',
+
             // state
             options: () => ({}),
             axis: 'x',
@@ -74,26 +79,16 @@
         }
     );
 
-    // State =====================================================
     const plugins: EmblaPluginType[] = [];
-    const options: EmblaOptionsType = {
-        axis: props.axis,
-        ...props.options,
-    };
+    const options: EmblaOptionsType = { axis: props.axis, ...props.options };
 
-    const [emblaRef, emblaApi] = emblaCarouselVue(options, plugins);
-    // ===========================================================
+    const [carouselRef, carouselApi] = Embla(options, plugins);
 
-    // Methods ===================================================
     function setPlugins() {
         plugins.push(WheelGestures());
 
         if (props.autoplay) {
-            plugins.push(
-                Autoplay({
-                    ...props.autoplayOptions,
-                })
-            );
+            plugins.push(Autoplay({ ...props.autoplayOptions }));
         }
 
         if (props.fade) {
@@ -111,32 +106,28 @@
 
     function mouseEnterHandler() {
         if (props.autoScroll && props.stopScrollOnHover) {
-            emblaApi.value?.plugins().autoScroll.stop();
+            carouselApi.value?.plugins().autoScroll.stop();
         }
         if (props.autoplay && props.stopScrollOnHover) {
-            emblaApi.value?.plugins().autoplay.stop();
+            carouselApi.value?.plugins().autoplay.stop();
         }
     }
     function mouseLeaveHandler() {
         if (props.autoScroll && props.stopScrollOnHover) {
-            emblaApi.value?.plugins().autoScroll.play();
+            carouselApi.value?.plugins().autoScroll.play();
         }
         if (props.autoplay && props.stopScrollOnHover) {
-            emblaApi.value?.plugins().autoplay.play();
+            carouselApi.value?.plugins().autoplay.play();
         }
     }
-    // ===========================================================
 
     setPlugins();
 
-    defineExpose({
-        emblaApi,
-        emblaRef,
-    });
+    defineExpose({ carouselApi, carouselRef });
 </script>
 
 <style scoped lang="scss">
-    .embla {
+    .carousel {
         user-select: none;
         width: 100%;
         &__container {

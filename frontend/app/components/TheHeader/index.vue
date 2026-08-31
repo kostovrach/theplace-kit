@@ -1,7 +1,6 @@
 <template>
     <header class="header">
         <div class="header__container">
-            <TheHeaderBurger class="header__burger" @click="openMenu" />
             Header
         </div>
     </header>
@@ -24,8 +23,6 @@
 </script>
 
 <style scoped lang="scss">
-    @use '~/assets/scss/abstracts' as *;
-
     .header {
         $p: &;
     }

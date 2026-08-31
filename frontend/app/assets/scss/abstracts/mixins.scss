@@ -2,7 +2,6 @@
 @use './colors' as *;
 @use './variables' as *;
 
-// layout
 @mixin content-container($max-width: rem(1920), $padding: 0 lineScale(32, 16, 480, 1920)) {
     max-width: $max-width;
     margin: 0 auto;
@@ -11,96 +10,6 @@
 
 @mixin content-block($margin: lineScale(128, 96, 480, 1920)) {
     margin: $margin 0;
-}
-
-// components
-@mixin skeleton(
-    $color: #e2e8f0,
-    $anim-color: linear-gradient(90deg, transparent, rgba(#ffffff, 0.4), transparent),
-    $height: 100%
-) {
-    position: relative;
-    width: 100%;
-    height: $height;
-    box-sizing: border-box;
-    background-color: $color;
-    border-radius: rem(8);
-    overflow: hidden;
-    &::before {
-        content: '';
-        position: absolute;
-        z-index: 1;
-        inset: 0;
-        background: $anim-color;
-        animation: skeleton-anim 1.2s ease infinite;
-        pointer-events: none;
-    }
-    @keyframes skeleton-anim {
-        from {
-            translate: -100%;
-        }
-        to {
-            translate: 100%;
-        }
-    }
-}
-
-@mixin searchbar() {
-    position: relative;
-    width: 100%;
-    max-width: rem(640);
-    &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: rem(2);
-        background-image: linear-gradient(90deg, $c-accent 50%, $c-000000 50%);
-        background-size: 200% 100%;
-        background-position: 100% 0;
-        transition: background-position $td $tf;
-    }
-    &:has(input:focus),
-    &:not(:has(input:placeholder-shown)) {
-        &::before {
-            background-position: 0;
-        }
-        > span:has(svg) {
-            color: $c-accent;
-        }
-    }
-    @media (pointer: fine) {
-        &:hover {
-            > input {
-                &::placeholder {
-                    opacity: 0.5;
-                }
-            }
-        }
-    }
-    > input {
-        width: 100%;
-        font-family: inherit;
-        color: inherit;
-        font-size: lineScale(18, 16, 480, 1920);
-        font-weight: $fw-semi;
-        padding: rem(20) rem(48) rem(20) 0;
-        background-color: transparent;
-        &::placeholder {
-            color: inherit;
-            opacity: 0.25;
-            transition: opacity $td $tf;
-        }
-    }
-    > span:has(svg) {
-        position: absolute;
-        top: 50%;
-        right: rem(16);
-        translate: 0 -50%;
-        pointer-events: none;
-        transition: color $td $tf;
-    }
 }
 
 @mixin text-content(
@@ -112,7 +21,7 @@
     flex-direction: column;
     gap: rem(16);
     font-size: $font-size;
-    line-height: 1.5;
+    line-height: 1.4;
     h2 {
         font-weight: $fw-semi;
         font-size: $h2-size;
@@ -162,234 +71,23 @@
     hr {
         width: 100%;
         height: rem(1);
-        background: linear-gradient(
+        background-image: linear-gradient(
             90deg,
             transparent 0%,
             rgba($c-secondary, 0.5) 10%,
             rgba($c-secondary, 0.5) 90%,
             transparent 100%
         );
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
         margin: rem(16) 0;
     }
 }
 
-@mixin checkbox() {
-    $color: $c-accent;
-    $size: rem(24);
-
-    cursor: pointer;
-    position: relative;
-    width: $size;
-    min-width: $size;
-    height: $size;
-    min-height: $size;
-    aspect-ratio: 1;
-    border: rem(2) solid $c-998D8D;
-    transition: border-color $td $tf;
-    &::before,
-    &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        translate: -50% -50%;
-        width: rem(12);
-        height: rem(2);
-        background-color: $c-998D8D;
-        opacity: 0.25;
-        transition: all calc($td * 2) $tf-spring 0s;
-    }
-    @media (pointer: fine) {
-        &:hover {
-            border-color: $color;
-            &::before,
-            &::after {
-                opacity: 1;
-                background-color: $color;
-            }
-            &::after {
-                rotate: 270deg;
-            }
-        }
-    }
-    &:has(input:focus-visible) {
-        border-color: $color;
-        &::before,
-        &::after {
-            opacity: 1;
-            background-color: $color;
-        }
-        &::after {
-            rotate: 270deg;
-        }
-    }
-    &:has(input:checked) {
-        border-color: $color;
-        &::before,
-        &::after {
-            opacity: 1;
-            background-color: $color;
-        }
-        &::before {
-            width: rem(6);
-            rotate: -135deg;
-            translate: -100% 0;
-        }
-        &::after {
-            width: rem(10);
-            rotate: 135deg;
-            translate: -30% -30%;
-        }
-    }
-}
-
-// effects
-@mixin gradient-text-hover($main-color: $c-000000, $accent-color: $c-FFFFFF) {
-    @supports (background-clip: text) {
-        color: transparent;
-        background-clip: text;
-        background-image: linear-gradient(90deg, $accent-color 50%, $main-color 50%);
-        background-size: 250% 200%;
-        background-position: -80% -100%;
-        transition: background-position $td $tf;
-        @media (pointer: fine) {
-            &:hover {
-                background-position: -160% -200%;
-            }
-        }
-    }
-    @supports not (background-clip: text) {
-        transition: color $td $tf;
-        @media (pointer: fine) {
-            &:hover {
-                color: $accent-color;
-            }
-        }
-    }
-}
-
-@mixin hover-underline($color: currentColor) {
-    position: relative;
-    width: fit-content;
-    line-height: 1.5;
-    transition: all $td $tf;
-    &::after {
-        content: '';
-        display: block;
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        height: rem(2);
-        width: 0;
-        background-color: $color;
-        transition: $td $tf;
-    }
-    @media (pointer: fine) {
-        &:hover {
-            color: $color;
-            &::after {
-                width: 100%;
-            }
-        }
-    }
-}
-
-@mixin hover-blick-line($init-color: currentColor, $anim-color: $c-000000) {
-    position: relative;
-    line-height: 1.5;
-    color: $init-color;
-    transition: color $td $tf;
-    overflow: hidden;
-    &::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 0;
-        height: rem(1);
-        background-color: $init-color;
-        transition: all $td $tf;
-    }
-    @media (pointer: fine) {
-        &:hover {
-            color: $anim-color;
-            &::before {
-                width: 100%;
-                translate: 100%;
-                background-color: $anim-color;
-            }
-        }
-    }
-}
-
-@mixin hover-circle-left(
-    $color: $c-accent,
-    $circle-size: rem(5),
-    $transition: (
-        color $td $tf,
-        translate $td $tf,
-    )
-) {
-    position: relative;
-    @media (pointer: fine) {
-        &:hover,
-        &:focus {
-            > span {
-                color: $color;
-                translate: calc($circle-size + rem(4)) 0;
-            }
-            &::before {
-                width: $circle-size;
-            }
-        }
-    }
-    > span {
-        display: block;
-        transition: $transition;
-    }
-    &::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        translate: 0 -50%;
-        width: 0;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        background-color: $color;
-        will-change: width;
-        transition: width $td $tf;
-        transform-origin: center;
-    }
-}
-
-// tech
 @mixin hide-scrollbar() {
     scrollbar-width: none;
     -ms-overflow-style: none;
     &::-webkit-scrollbar {
         display: none;
-    }
-}
-
-// animations
-@mixin arrow-translate {
-    @keyframes arrow-translate {
-        0% {
-            translate: 0 0;
-            opacity: 1;
-        }
-        45% {
-            translate: 100% 0;
-            opacity: 0;
-        }
-        55% {
-            translate: -100% 0;
-            opacity: 0;
-        }
-        100% {
-            translate: 0 0;
-            opacity: 1;
-        }
     }
 }
