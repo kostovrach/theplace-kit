@@ -1,5 +1,6 @@
 /**
- * Приводит первую букву текста в uppercase
+ * Приведение первой буквы текста в uppercase
+ * 
  * @example upFirstLetter('foo bar') => 'Foo bar'
  */
 export function upFirstLetter(input: string): string {

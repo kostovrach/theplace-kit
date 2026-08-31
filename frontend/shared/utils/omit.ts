@@ -1,7 +1,5 @@
 /**
- * Возвращает новый объект без указанных ключей
- *
- * Аналог lodash.omit, но с полной типизацией
+ * Удаление указанных ключей из объекта без мутации оригинала
  *
  * @template T Исходный тип объекта
  * @template K Ключи, которые нужно исключить
@@ -31,7 +29,7 @@
  * //   name: "Иван Иванович"
  * // }
  */
-function omit<T, K extends keyof T>(obj: T, keys: readonly K[]): Omit<T, K> {
+export function omit<T, K extends keyof T>(obj: T, keys: readonly K[]): Omit<T, K> {
     const result = { ...obj };
 
     for (const key of keys) {

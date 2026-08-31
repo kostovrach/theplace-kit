@@ -1,12 +1,33 @@
 /**
- * Частичное скрытие номера телефона
+ * Частичное скрытие символов номера телефона.
  *
- * Заменяет указанные позиции символов на заданный символ (по умолчанию '*')
+ * Заменяет символы по указанным нулевым индексам на заданный символ.
+ * Остальные символы сохраняются без изменений.
  *
- * @param phone - номер телефона (string | number)
- * @param positions - массив индексов символов для скрытия
- * @param replacement - символ замены
- * @returns строка с частично скрытым номером
+ * Позиции считаются от нулевого индекса
+ *
+ * Если список позиций пуст или номер недостаточно длинный для одной
+ * из указанных позиций, функция возвращает исходное значение без изменений.
+ *
+ * @example
+ * partialHiddenPhone('+7 (999) 999-99-99', [5, 6, 9, 10, 11])
+ * // +7 (9**) ***-99-99
+ *
+ * @example
+ * partialHiddenPhone('79999999999', [5, 6, 9, 10, 11])
+ * // 79999**99***
+ *
+ * @param phone - Номер телефона в строковом или числовом представлении.
+ * @param positions - Массив нулевых индексов символов, которые необходимо скрыть.
+ * По умолчанию скрываются позиции `5`, `6`, `9`, `10` и `11`.
+ *
+ * @param replacement - Один символ, используемый для замены.
+ * По умолчанию используется `*`.
+ *
+ * @returns Строка с частично скрытыми символами номера или исходное значение,
+ * если номер недостаточно длинный или список позиций пуст.
+ *
+ * Или исходное значение, если `replacement` содержит более одного символа или пустую строку.
  */
 export function partialHiddenPhone(
     phone: string | number,
@@ -14,11 +35,28 @@ export function partialHiddenPhone(
     replacement: string = '*'
 ): string {
     const phoneString = phone.toString();
-    if (phoneString.length < Math.max(...positions)) return phoneString;
 
-    let digits = phoneString.split('');
-    positions.forEach((pos) => {
-        digits[pos] = replacement;
+    if (!positions.length) {
+        return phoneString;
+    }
+
+    if (replacement.length !== 1) {
+        return phoneString;
+    }
+
+    const maxPosition = Math.max(...positions);
+
+    if (maxPosition < 0 || phoneString.length <= maxPosition) {
+        return phoneString;
+    }
+
+    const characters = phoneString.split('');
+
+    positions.forEach((position) => {
+        if (position >= 0 && position < characters.length) {
+            characters[position] = replacement;
+        }
     });
-    return digits.join('');
+
+    return characters.join('');
 }

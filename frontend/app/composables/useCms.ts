@@ -4,20 +4,24 @@ import type { Query, UnpackList } from '@directus/sdk';
 /**
  * Алиас стандартного query-типа Directus SDK
  * с привязкой к конкретной коллекции схемы.
- ** @template C - Имя коллекции из `Schema`
+ * @template C - Имя коллекции из `Schema`
+ *
+ * @internal
  */
 type LocalQueryType<C extends CollectionNameType> = Query<Schema, UnpackList<Schema[C]>>;
 
 /**
  * Параметры запроса к серверному proxy Directus.
- * Повторяют основные поля `Query` из `@directus/sdk` с привязкой к коллекции.
+ * Повторяют основные поля `Query` из Directus SDK с привязкой к коллекции.
  * @template C - Имя коллекции из `Schema`
+ *
+ * @internal
  */
 interface IUseCmsParams<C extends CollectionNameType> {
     /**
      * Список полей в формате Directus SDK (объектный или строковый синтаксис).
      *
-     * Имеет **наивысший приоритет**: если передан, параметр `relations` игнорируется.
+     * **Имеет наивысший приоритет: если передан, параметр {@link relations} игнорируется.**
      * @example
      * ['*', { cover: ['*'], author: ['id', 'name'] }]
      */
@@ -32,7 +36,7 @@ interface IUseCmsParams<C extends CollectionNameType> {
      * Поддерживает несколько полей через запятую в одном элементе:
      * `'blocks.item.file.id,title'` => `['blocks.item.file.id', 'blocks.item.file.title']`.
      *
-     * **Игнорируется, если одновременно передан `fields`**.
+     * **Игнорируется, если одновременно передан {@link fields}**.
      *
      * @example
      * ['cover.*', 'blocks.*', 'blocks.item.*', 'blocks.item.image.*']
@@ -87,6 +91,8 @@ interface IUseCmsParams<C extends CollectionNameType> {
 /**
  * Унифицированный результат работы composable.
  * @template T - Тип данных, которые ожидаются в `content`
+ *
+ * @internal
  */
 interface IUseCmsResponse<T> {
     /**
@@ -122,6 +128,8 @@ interface IUseCmsResponse<T> {
  *
  * @param relations - Массив строк связей
  * @returns Плоский массив field-путей
+ * 
+ * @internal
  */
 function parseRelations(relations: string[]): string[] {
     const result: string[] = [];
@@ -162,6 +170,8 @@ function parseRelations(relations: string[]): string[] {
  * @template C - Имя коллекции
  * @param params - Параметры запроса
  * @returns Объект, готовый к передаче в `$fetch` как `query`
+ * 
+ * @internal
  */
 function buildQuery<C extends CollectionNameType>(
     params: IUseCmsParams<C> = {}
@@ -200,13 +210,15 @@ function buildQuery<C extends CollectionNameType>(
 }
 
 /**
- * Фабрика обработчика для `useAsyncData`.
+ * Фабрика обработчика для {@link useAsyncData}.
  * Создает функцию, которая выполняет `$fetch` к указанному URL.
  *
  * @template T - Ожидаемый тип данных внутри `ICmsResponse`
  * @param url - Endpoint API (`/api/cms/...`)
  * @param query - Query-параметры
  * @returns Async-функция, возвращающая `ICmsResponse<T>`
+ * 
+ * @internal
  */
 function createCmsFetcher<T>(url: string, query: Record<string, string>) {
     return async (): Promise<ICmsResponse<T>> => {
@@ -218,20 +230,20 @@ function createCmsFetcher<T>(url: string, query: Record<string, string>) {
  * Основной composable для чтения данных из Directus через Nuxt API-роуты.
  *
  * Предоставляет три метода:
- * - `collection` - список элементов regular-коллекции      (массив)
- * - `singleton`  - singleton-коллекция                     (объект)
- * - `item`       - один элемент regular-коллекции по ID    (объект)
+ * - `getCollection` - список элементов regular-коллекции      (массив)
+ * - `getSingleton`  - singleton-коллекция                     (объект)
+ * - `getItem`       - один элемент regular-коллекции по ID    (объект)
  *
  * @example
  * // С использванием relations (сахар)
- * const { content } = await useCms().collection('articles', {
+ * const { content } = await useCms().getCollection('articles', {
  *   relations: ['cover.*', 'blocks.*', 'blocks.item.*', 'blocks.item.image.*'],
  *   filter: { published: { _eq: true } },
  * });
  *
  * @example
  * С использованием fields (полный контроль)
- * const { content, error } = await useCms().collection('articles', {
+ * const { content, error } = await useCms().getCollection('articles', {
  *   fields: ['id', 'title', { author: ['name'] }],
  *   filter: { status: { _eq: 'published' } },
  *   limit: 10,
@@ -239,9 +251,9 @@ function createCmsFetcher<T>(url: string, query: Record<string, string>) {
  */
 export function useCms() {
     return {
-        collection: useCmsCollection,
-        singleton: useCmsSingleton,
-        item: useCmsItem,
+        getCollection: useCmsCollection,
+        getSingleton: useCmsSingleton,
+        getItem: useCmsItem,
     };
 }
 
@@ -250,12 +262,12 @@ export function useCms() {
  *
  * @template C - Имя regular-коллекции
  * @param collection - Название коллекции
- * @param params - Параметры запроса (`IUseCmsParams`)
- * @param requestOpts - Опции `useAsyncData` (lazy, server, immediate, watch…)
+ * @param params - Параметры запроса ({@link IUseCmsParams})
+ * @param requestOpts - Опции {@link useAsyncData} (lazy, server, immediate, watch…)
  * @returns Объект с `content`, `error`, `status` и `refresh`
  *
  * @example
- * const { content, error } = await useCms().collection('articles', {
+ * const { content, error } = await useCms().getCollection('articles', {
  *   fields: ['id', 'title', { author: ['name'] }],
  *   filter: { status: { _eq: 'published' } },
  *   limit: 10,
@@ -295,12 +307,12 @@ async function useCmsCollection<C extends RegularCollectionType>(
  *
  * @template C - Имя singleton-коллекции
  * @param collection - Название коллекции
- * @param params - Параметры запроса (`IUseCmsParams`)
- * @param requestOpts - Опции `useAsyncData` (lazy, server, immediate, watch…)
+ * @param params - Параметры запроса ({@link IUseCmsParams})
+ * @param requestOpts - Опции {@link useAsyncData} (lazy, server, immediate, watch…)
  * @returns Объект с `content`, `error`, `status` и `refresh`
  *
  * @example
- * const { content } = await useCms().singleton('home_page', {
+ * const { content } = await useCms().getSingleton('home_page', {
  *   fields: ['*', { hero_image: ['*'] }],
  * });
  */
@@ -339,12 +351,12 @@ async function useCmsSingleton<C extends SingletonCollectionType>(
  * @template C - Имя regular-коллекции
  * @param collection - Название коллекции
  * @param id - Primary key элемента
- * @param params - Параметры запроса (`IUseCmsParams`)
- * @param requestOpts - Опции `useAsyncData` (lazy, server, immediate, watch…)
+ * @param params - Параметры запроса ({@link IUseCmsParams})
+ * @param requestOpts - Опции {@link useAsyncData} (lazy, server, immediate, watch…)
  * @returns Объект с `content`, `error`, `status` и `refresh`
  *
  * @example
- * const { content } = await useCms().item('articles', 'uuid-or-id', {
+ * const { content } = await useCms().getItem('articles', 'uuid-or-id', {
  *   fields: ['*', { cover: ['*'] }],
  * });
  */

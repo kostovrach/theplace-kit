@@ -1,5 +1,22 @@
 const LOG_PREFIX = '[CmsCache]';
 
+/**
+ * Обработчик webhook для досрочного сброса кэша CMS.
+ *
+ * Endpoint предназначен для вызова из Directus после изменения содержимого коллекции.
+ * В теле запроса передается имя измененной коллекции, после чего
+ * обработчик удаляет все кэшированные ответы, относящиеся к этой коллекции.
+ *
+ * Доступ к endpoint защищен общим секретом, который передается в HTTP-заголовке
+ * `x-webhook-secret` и сравнивается со значением `directus.webhookSecret`
+ * из runtime-конфигурации приложения.
+ *
+ * Обработчик возвращает HTTP `401`, если секрет отсутствует или не совпадает,
+ * HTTP `400`, если имя коллекции не передано, HTTP `500` при ошибке работы
+ * с хранилищем кэша и HTTP `200` после успешного удаления кэшированных записей.
+ *
+ * @returns Promise с результатом выполнения операции, содержащий флаг успешности, HTTP-статус и текстовое сообщение.
+ */
 export default defineEventHandler(
     async (event): Promise<{ success: boolean; status: number; message: string }> => {
         const config = useRuntimeConfig();
@@ -7,14 +24,19 @@ export default defineEventHandler(
         const secretHeader = getHeader(event, 'x-webhook-secret');
         const webhookSecret = config.directus.webhookSecret;
 
-        /** Проверка подписи вебхука */
         if (!webhookSecret.length || secretHeader !== webhookSecret) {
             setResponseStatus(event, 401);
+
             logger('error', LOG_PREFIX, 'Unauthorized: Invalid webhook secret');
             return { success: false, status: 401, message: 'Unauthorized: Invalid webhook secret' };
         }
-
-        /** Контракт, что в теле запроса передается только название коллекции */
+        
+        /**
+         * Имя коллекции, содержимое которой было изменено в Directus.
+         *
+         * Согласно контракту webhook, тело запроса содержит только
+         * строковое имя коллекции без дополнительной структуры.
+         */
         const collection = await readBody<string | undefined>(event);
 
         if (!collection) {
@@ -28,12 +50,23 @@ export default defineEventHandler(
         }
 
         try {
-            /** Глобальное хранилище кэша Nuxt */
             const cache = useStorage('cache');
-            /** Ключи, начинающиеся с `nitro:handlers:cms` */
+
+            /**
+             * Все ключи кэша CMS, зарегистрированные в хранилище Nitro.
+             *
+             * Пространство ключей ограничивается префиксом
+             * `nitro:handlers:cms`, соответствующим кэшируемым CMS-обработчикам.
+             */
             const allKeys = await cache.getKeys('nitro:handlers:cms');
 
-            /** Шаблон ключа: `[группа]:[имя]:[ключ_запроса].json` */
+            /**
+             * Ключи кэша, относящиеся к изменённой коллекции.
+             *
+             * Кэшированные ответы для коллекции могут соответствовать как
+             * запросу всей коллекции, так и запросам отдельных элементов.
+             * Поэтому удаляются все ключи, содержащие идентификатор коллекции.
+             */
             const keysToRemove = allKeys.filter((key) => key.includes(`collection-${collection}`));
 
             await Promise.all(keysToRemove.map((key) => cache.removeItem(key)));

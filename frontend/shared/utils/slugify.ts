@@ -1,10 +1,27 @@
 /**
- * Генерация URL-friendly slug из строки
+ * Преобразование строки в URL-friendly slug.
  *
- * Преобразует текст в латиницу, удаляет спецсимволы и приводит к формату slug
+ * Функция приводит входное значение к нижнему регистру, транслитерирует
+ * поддерживаемые кириллические символы в латиницу, удаляет диакритические
+ * знаки и символы, не являющиеся латинскими буквами, цифрами, пробелами или дефисами.
  *
- * @param text - исходный текст (string | number)
- * @returns slug-строка
+ * Пробельные последовательности преобразуются в одиночные дефисы, а повторяющиеся дефисы объединяются в один.
+ *
+ * Символы кириллицы, отсутствующие в таблице транслитерации, а также прочие неподдерживаемые символы удаляются.
+ *
+ * @param text - Исходный текст или числовое значение, преобразуемое в строку перед обработкой.
+ *
+ * @returns URL-friendly slug в нижнем регистре, содержащий латинские буквы, цифры и дефисы.
+ *
+ * @example
+ * slugify('Привет, мир!')
+ * // 'privet-mir'
+ *
+ * slugify('Моя статья -- 2026')
+ * // 'moya-statya-2026'
+ *
+ * slugify('Hello World')
+ * // 'hello-world'
  */
 export function slugify(text: string | number): string {
     const translitMap: Record<string, string> = {
@@ -43,16 +60,14 @@ export function slugify(text: string | number): string {
         я: 'ya',
     };
 
-    return text
-        .toString()
-        .toLowerCase()
-        .split('')
-        .map((ch) => translitMap[ch] ?? ch)
+    return [...String(text)]
+        .map((char) => translitMap[char.toLowerCase()] ?? char.toLowerCase())
         .join('')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9\s-]/g, '')
         .trim()
         .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
 }
