@@ -1,23 +1,21 @@
 <template>
-    <SvgIcon
-        :name="props.type"
+    <svg
+        class="icon"
         :width="props.size"
         :height="props.size"
-        :style="`color: ${props.color}`"
-    />
+        focusable="false"
+        v-bind="{ ...$attrs }"
+    >
+        <use :href="`#${name}`" />
+    </svg>
 </template>
 
 <script setup lang="ts">
     const props = withDefaults(
         defineProps<{
-            type?: string;
+            name: SpriteKeyType;
             size?: number | string;
-            color?: string;
         }>(),
-        {
-            type: 'arrow',
-            size: 24,
-            color: 'currentColor',
-        }
+        { size: 24 }
     );
 </script>

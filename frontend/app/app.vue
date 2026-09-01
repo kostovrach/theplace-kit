@@ -14,7 +14,6 @@
 <script setup lang="ts">
     import { ModalsContainer } from 'vue-final-modal';
 
-    // SEO & Meta ==================================================
     useHead({
         title: 'ThePlace-kit',
         htmlAttrs: {

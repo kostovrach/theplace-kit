@@ -3,8 +3,9 @@
     "type": "module",
     "private": true,
     "scripts": {
-        "directus:typegen": "tsx scripts/typegen",
-        "dev": "pnpm directus:typegen && nuxt dev",
+        "directus-typegen": "tsx scripts/directus-typegen",
+        "spritegen": "tsx scripts/spritegen",
+        "dev": "nuxt dev",
         "build": "nuxt build",
         "generate": "nuxt generate",
         "preview": "nuxt preview",

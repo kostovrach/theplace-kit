@@ -1,12 +1,14 @@
 import { execSync } from 'node:child_process';
-import { styleText } from 'node:util';
 import { promises as fs } from 'node:fs';
 import { config as dotenv } from 'dotenv';
 import path from 'node:path';
 
 import { CONFIG } from './config';
+import { createLogger, decoratePath } from '../utils/logger';
 
 dotenv();
+
+const log = createLogger();
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL;
 const DIRECTUS_TOKEN = process.env.DIRECTUS_TYPEGEN_TOKEN;
@@ -19,12 +21,30 @@ function toKebabCase(name: string): string {
         .toLowerCase();
 }
 
-/** Гарантированное создание директории, при отсутствии */
+/**
+ * Гарантированное создание директории и всех отсутствующих родительских директорий.
+ *
+ * Если директория уже существует, операция завершается без ошибки.
+ *
+ * @param dir - Путь к директории, которую необходимо создать.
+ *
+ * @returns Promise, который завершается после создания директории.
+ */
 async function ensureDir(dir: string) {
     await fs.mkdir(dir, { recursive: true });
 }
 
-/** Очистка целевой директории от всех TypeScript-файлов */
+/**
+ * Очистка целевой директории от TypeScript-файлов.
+ *
+ * При отсутствии целевой директории выполняется ее создание.
+ * Удаляются только файлы с расширением `.ts`, остальные файлы
+ * и директории остаются без изменений.
+ *
+ * @param dir - Путь к директории для очистки.
+ *
+ * @returns Promise, завершающийся после удаления найденных TypeScript-файлов.
+ */
 async function rimrafTs(dir: string) {
     await ensureDir(dir);
     const files = await fs.readdir(dir);
@@ -34,21 +54,31 @@ async function rimrafTs(dir: string) {
 }
 
 /**
- * Обработка падения генерации
- * Проверяет наличие индексного файла и создает заглушку при отсутствии
+ * Fallback-обработка при невозможности получить актуальную схему Directus.
+ *
+ * Проверка наличия ранее сгенерированного индексного файла.
+ * При его наличии используются ранее сгенерированные типы.
+ *
+ * При отсутствии индексного файла выполняется создание fallback-структуры,
+ * содержащей пустую схему и базовые типы и коллекции, необходимые
+ * для корректной работы остального кода.
+ *
+ * @returns Promise, завершающийся после проверки существующих типов
+ * или создания fallback-файлов.
+ *
+ * @throws Может возникнуть ошибка при создании директории или записи fallback-файла.
  */
 async function handleFallback() {
     const indexPath = path.join(CONFIG.OUT_DIR, CONFIG.INDEX_FILE);
 
     try {
-        /** Проверка существования файла */
+        /** Проверка существования индексного файла */
         await fs.stat(indexPath);
-        console.log(CONFIG.LOG_PREFIX, 'Using previously cached types');
+        log.info('Using previously cached types');
     } catch {
-        /** Генерация fallback структуры, при отсуствии файла */
-        console.log(
-            CONFIG.WARN_PREFIX,
-            `Index file not found. Creating fallback types stub at: ${styleText('cyanBright', indexPath)}`
+        /** Создание fallback-структуры при отсутствии индексного файла */
+        log.warn(
+            `Index file not found. Creating fallback types stub at: ${decoratePath(indexPath)}`
         );
 
         const fallbackContent = [
@@ -74,8 +104,18 @@ async function handleFallback() {
 }
 
 /**
- * Вызов CLI генератора `directus-ts-typegen`
- * @returns `boolean` Успешность генерации файла
+ * Вызов CLI-генератора `directus-ts-typegen`.
+ *
+ * Формирование аргументов на основе конфигурации и переменных окружения,
+ * запуск CLI-команды и сохранение результата во временный файл.
+ *
+ * При успешном завершении CLI-команды возвращается `true`.
+ * При возникновении ошибки выполнения возвращается `false`, после чего
+ * вызывающий код может использовать ранее сгенерированные типы
+ * или fallback-структуру.
+ *
+ * @returns `true`, если генерация типов завершилась успешно;
+ * `false`, если выполнение CLI-команды завершилось ошибкой.
  */
 function runTypegen(): boolean {
     const args = [
@@ -95,8 +135,7 @@ function runTypegen(): boolean {
         });
         return true;
     } catch {
-        console.warn(
-            CONFIG.WARN_PREFIX,
+        log.warn(
             'Failed to fetch types from Directus instance. Is the server running? Using cached types if available'
         );
         return false;
@@ -104,12 +143,20 @@ function runTypegen(): boolean {
 }
 
 /**
- * Разделение файла схемы на отдельные файлы с типами
- * @param raw временная монолитная схема
- * @returns объект `interfaces`, где ключ - имя интерфейса и значение - тип
+ * Разделение монолитного файла схемы на отдельные интерфейсы.
+ *
+ * Поиск экспортируемых интерфейсов выполняется по конструкции
+ * `export interface <Name> { ... }`.
+ *
+ * Каждый найденный интерфейс сохраняется в объекте, где ключом является
+ * его имя, а значением полный исходный блок интерфейса.
+ *
+ * @param raw - Содержимое временного файла со сгенерированной схемой.
+ *
+ * @returns Объект с найденными интерфейсами.
+ * Ключом является имя интерфейса, значением — его исходный код.
  */
 function splitContent(raw: string): { interfaces: Record<string, string> } {
-    /** Блоки с export `interface <Name> { ... }` */
     const blockRe = /export\s+interface\s+(\w+)\s*\{[\s\S]*?\n\}/g;
 
     const interfaces: Record<string, string> = {};
@@ -127,9 +174,19 @@ function splitContent(raw: string): { interfaces: Record<string, string> } {
 }
 
 /**
- * Извлечение названия коллекций из интерфейса Schema.
- * - regular: значение имеет вид `SomeType[]`
- * - singleton: значение без `[]`
+ * Извлечение названий regular и singleton коллекций из интерфейса `Schema`.
+ *
+ * Определение типа коллекции выполняется по типу ее значения:
+ *
+ * - `SomeType[]` - regular-коллекция;
+ * - `SomeType`   - singleton-коллекция.
+ *
+ * Полученные названия используются для формирования типизированных
+ * множеств коллекций в индексном файле.
+ *
+ * @param raw - Содержимое временного файла со сгенерированной схемой.
+ *
+ * @returns Объект с двумя множествами названий коллекций: `regularCollections` и `singletonCollections`.
  */
 function extractCollections(raw: string): {
     regularCollections: Set<string>;
@@ -146,7 +203,6 @@ function extractCollections(raw: string): {
 
     const body = schemaMatch[1];
 
-    // Каждая строка вида:  name: Type;   или   name: Type[];
     const fieldRe = /^\s*([a-zA-Z0-9_]+)\s*:\s*([^;]+);/gm;
 
     let m: RegExpExecArray | null;
@@ -167,10 +223,33 @@ function extractCollections(raw: string): {
 }
 
 /**
- * Запись файлов
- * @param interfaces объект, где ключ - имя интерфейса и значение - тип
- * @param regularCollections словарь регулярных коллекций
- * @param singletonCollections словарь singleton коллекций
+ * Запись разделенных типов коллекций и индексного файла.
+ *
+ * Для каждого интерфейса выполняются:
+ * - преобразование имени интерфейса в имя TypeScript-файла;
+ * - запись интерфейса в отдельный файл;
+ * - добавление re-export в индексный файл.
+ *
+ * Дополнительно формируются:
+ * - `CollectionNameType`;
+ * - `RegularCollectionType`;
+ * - `SingletonCollectionType`;
+ * - `regularCollections`;
+ * - `singletonCollections`.
+ *
+ * Перед записью выполняется очистка целевой директории от ранее
+ * сгенерированных TypeScript-файлов.
+ *
+ * @param interfaces - Объект с интерфейсами, где ключом является имя
+ * интерфейса, а значением его исходный код.
+ *
+ * @param regularCollections - Множество названий regular-коллекций.
+ *
+ * @param singletonCollections - Множество названий singleton-коллекций.
+ *
+ * @returns Promise, завершающийся после записи всех сгенерированных файлов.
+ *
+ * @throws Может вернуть ошибку при очистке директории, создании файлов или записи.
  */
 async function writeOutputs(
     interfaces: Record<string, string>,
@@ -223,23 +302,20 @@ async function writeOutputs(
 
     await fs.writeFile(path.join(CONFIG.OUT_DIR, CONFIG.INDEX_FILE), index, 'utf-8');
 
-    console.log(CONFIG.SUCCESS_PREFIX, `Generated: ${collectionExports.length} collection(s)`);
+    log.success(`Generated: ${collectionExports.length} collection(s)`);
 }
 
 async function main() {
     if (!DIRECTUS_URL || !DIRECTUS_TOKEN) {
-        console.warn(
-            CONFIG.WARN_PREFIX,
-            'Skipping generation: DIRECTUS_URL or DIRECTUS_TYPEGEN_TOKEN missing in .env. Using existing types'
+        log.warn(
+            `Skipping generation: ${decoratePath('DIRECTUS_URL')} or ${decoratePath('DIRECTUS_TYPEGEN_TOKEN')} missing in .env.`,
+            'Using existing types'
         );
         await handleFallback();
         return;
     }
 
-    console.log(
-        CONFIG.LOG_PREFIX,
-        `Attempting to generate types from Directus via URL: ${styleText('cyan', DIRECTUS_URL)}`
-    );
+    log.info(`Attempting to generate types from Directus via URL: ${decoratePath(DIRECTUS_URL)}`);
 
     try {
         /** Подключение к файлам */
@@ -259,13 +335,11 @@ async function main() {
         /** Разделение по файлам */
         const { interfaces } = splitContent(raw);
         const { regularCollections, singletonCollections } = extractCollections(raw);
+
         await writeOutputs(interfaces, regularCollections, singletonCollections);
     } catch (fsOrParsingError) {
-        console.error(
-            CONFIG.ERR_PREFIX,
-            'An error occurred during file processing:',
-            fsOrParsingError
-        );
+        log.error('An error occurred during file processing:', fsOrParsingError);
+
         await handleFallback();
     } finally {
         /** Удаление временной схемы */

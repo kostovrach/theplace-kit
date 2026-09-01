@@ -1,3 +1,5 @@
+import { execSync } from 'node:child_process';
+
 export default defineNuxtConfig({
     compatibilityDate: '2026-08-31',
     ssr: true,
@@ -73,6 +75,15 @@ export default defineNuxtConfig({
 
     imports: {
         dirs: ['~/types/**'],
+    },
+
+    hooks: {
+        'build:before': async () => {
+            await Promise.all([
+                execSync('pnpm directus-typegen', { stdio: 'inherit' }),
+                execSync('pnpm spritegen', { stdio: 'inherit' }),
+            ]);
+        },
     },
 
     build: {
