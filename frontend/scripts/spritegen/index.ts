@@ -94,7 +94,7 @@ function toIconId(relativePath: string): string {
  * Если хотя бы один из файлов отсутствует, функция создаёт fallback-файлы:
  *
  * - пустой SVG-спрайт;
- * - тип `SpriteKeyType` с произвольным строковым значением.
+ * - тип `SpriteKey` с произвольным строковым значением.
  *
  * Это нужно для сохранения ожидаемой структуры сгенерированных файлов
  * при невозможности выполнить полноценную генерацию.
@@ -113,7 +113,7 @@ async function handleFallback() {
         log.info('Creating fallback stubs');
 
         const sprite = `${CONFIG.FILE_HEADER}\n` + `export const sprite = \`${EMPTY_SPRITE}\`;\n`;
-        const type = `${CONFIG.FILE_HEADER}\n` + `export type SpriteKeyType = string;\n`;
+        const type = `${CONFIG.FILE_HEADER}\n` + `export type SpriteKey = string;\n`;
 
         await Promise.all([
             ensureDir(path.dirname(CONFIG.OUT_SPRITE_FILE)),
@@ -162,7 +162,7 @@ async function readFiles() {
  * После обработки всех файлов:
  * - символы объединяются в единый SVG-спрайт;
  * - ID сортируются;
- * - на их основе формируется `SpriteKeyType`;
+ * - на их основе формируется `SpriteKey`;
  * - оба результата записываются в соответствующие выходные файлы.
  *
  * Если SVG-файлы не найдены, создаётся или используется fallback
@@ -206,7 +206,7 @@ async function writeOutputs(files: string[]) {
     const spriteOutput =
         `${CONFIG.FILE_HEADER}\n` + `export const sprite = \`${sprite.replace(/`/g, '\\`')}\`;`;
 
-    const typeOutput = `${CONFIG.FILE_HEADER}\n` + `export type SpriteKeyType = ${keyType};`;
+    const typeOutput = `${CONFIG.FILE_HEADER}\n` + `export type SpriteKey = ${keyType};`;
 
     await Promise.all([
         ensureDir(path.dirname(CONFIG.OUT_SPRITE_FILE)),

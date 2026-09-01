@@ -17,7 +17,7 @@
             @click="scrollPrev"
             :disabled="!canScrollPrev"
         >
-            <SvgSprite :type="props.buttonIcon" :size="20" />
+            <SvgSprite :name="props.buttonIcon" :size="20" />
         </button>
 
         <div v-if="props.pagination === 'bullets'" class="carousel-controls__bullets">
@@ -45,7 +45,7 @@
             @click="scrollNext"
             :disabled="!canScrollNext"
         >
-            <SvgSprite :type="props.buttonIcon" :size="20" />
+            <SvgSprite :name="props.buttonIcon" :size="20" />
         </button>
     </div>
 </template>
@@ -56,8 +56,8 @@
             size?: 'fit-content' | '100%' | 'auto';
             direction?: 'horizontal' | 'vertical';
             pagination?: 'none' | 'num' | 'bullets';
-            for: ComputedRef<CarouselInstanceType | null>;
-            buttonIcon?: string;
+            for: ComputedRef<CarouselInstance | null>;
+            buttonIcon?: SpriteKey;
         }>(),
         {
             size: 'fit-content',

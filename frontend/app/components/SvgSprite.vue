@@ -13,7 +13,7 @@
 <script setup lang="ts">
     const props = withDefaults(
         defineProps<{
-            name: SpriteKeyType;
+            name: SpriteKey;
             size?: number | string;
         }>(),
         { size: 24 }

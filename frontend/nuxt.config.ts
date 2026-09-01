@@ -12,13 +12,9 @@ export default defineNuxtConfig({
         },
     },
 
-    experimental: {
-        payloadExtraction: true,
-    },
+    experimental: { payloadExtraction: true },
 
-    nitro: {
-        preset: 'node-server',
-    },
+    nitro: { preset: 'node-server' },
 
     modules: ['@pinia/nuxt', '@vueuse/nuxt', '@vue-final-modal/nuxt'],
 
@@ -45,15 +41,17 @@ export default defineNuxtConfig({
         public: {
             cmsUrl: process.env.DIRECTUS_URL || '',
             siteUrl: process.env.SITE_URL || '',
-
-            /** dev / prod */
-            appEnv: process.env.APP_ENV || 'dev',
+            directus: {
+                url: process.env.DIRECTUS_URL || '',
+                autoWebp: Boolean(process.env.DIRECTUS_AUTO_WEBP) || true,
+            },
         },
         logger: {
             /**
              * - `DEBUG`: полное логирование
+             * - `INFO`:  включить информационные сообщения
+             * - `WARN`:  предупреждения и ошибки
              * - `ERROR`: только ошибки
-             * - `PROD`: предупреждения и ошибки
              */
             level: process.env.LOG_LEVEL || 'DEBUG',
         },
@@ -67,15 +65,12 @@ export default defineNuxtConfig({
             port: process.env.SMTP_PORT || '465',
             user: process.env.SMTP_USER || '',
             pass: process.env.SMTP_PASS || '',
-            target: process.env.SMTP_ORDERS_TARGET || '',
         },
     },
 
     css: ['vue-final-modal/style.css', '~/assets/css/main.css'],
 
-    imports: {
-        dirs: ['~/types/**'],
-    },
+    imports: { dirs: ['~/types/**'] },
 
     hooks: {
         'build:before': async () => {
@@ -86,10 +81,7 @@ export default defineNuxtConfig({
         },
     },
 
-    build: {
-        transpile: ['@fancyapps/ui', 'fancyapps-ui'],
-    },
-    alias: {
-        'fancyapps-ui': './@fancyapps/ui/dist/index.esm.js',
-    },
+    build: { transpile: ['@fancyapps/ui', 'fancyapps-ui'] },
+
+    alias: { 'fancyapps-ui': './@fancyapps/ui/dist/index.esm.js' },
 });

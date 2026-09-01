@@ -5,7 +5,7 @@ import { styleText } from 'node:util';
  *
  * @internal
  */
-type LogLevelType = 'info' | 'success' | 'warn' | 'error';
+type LogLevel = 'info' | 'success' | 'warn' | 'error';
 
 /**
  * Префиксы для визуального обозначения разных уровней логирования.
@@ -15,7 +15,7 @@ type LogLevelType = 'info' | 'success' | 'warn' | 'error';
  *
  * @internal
  */
-const PREFIXES: Record<LogLevelType, string> = {
+const PREFIXES: Record<LogLevel, string> = {
     info: styleText('cyan', 'ℹ'),
     success: styleText('green', '✔'),
     warn: styleText('bgYellow', ' WARN '),
@@ -27,7 +27,7 @@ const PREFIXES: Record<LogLevelType, string> = {
  *
  * @internal
  */
-const METHODS: Record<LogLevelType, 'log' | 'warn' | 'error'> = {
+const METHODS: Record<LogLevel, 'log' | 'warn' | 'error'> = {
     info: 'log',
     success: 'log',
     warn: 'warn',
@@ -60,7 +60,7 @@ const METHODS: Record<LogLevelType, 'log' | 'warn' | 'error'> = {
  * log.error('Some error:', Error);
  */
 export function createLogger() {
-    function log(level: LogLevelType, ...args: unknown[]) {
+    function log(level: LogLevel, ...args: unknown[]) {
         const prefix = PREFIXES[level];
         const method = METHODS[level];
 

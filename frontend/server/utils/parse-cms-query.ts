@@ -21,7 +21,7 @@
  * При невалидном JSON в `fields` / `filter` / `sort` / `deep` выбрасывается ошибка со статусом `400`.
  *
  * @param raw - Сырой объект из `getQuery(event)`
- * @returns Нормализованный объект `ICmsQuery` для передачи в SDK
+ * @returns Нормализованный объект `CmsQuery` для передачи в SDK
  *
  * @throws { H3Error } status 400, если JSON в `fields`, `filter`, `sort` или `deep` невалиден
  *
@@ -31,8 +31,8 @@
  *
  * await directus.request(readItems(collection, query));
  */
-export function parseCmsQuery(raw: Record<string, string | string[] | undefined>): ICmsQuery {
-    const result: ICmsQuery = {};
+export function parseCmsQuery(raw: Record<string, string | string[] | undefined>): CmsQuery {
+    const result: CmsQuery = {};
 
     // fields
     // CSV: id,title,status

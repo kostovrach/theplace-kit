@@ -15,7 +15,7 @@ import type { Query, UnpackList } from '@directus/sdk';
  * Параметры запроса передаются через query string и преобразуются
  * {@link parseCmsQuery} в формат, совместимый с Directus SDK.
  *
- * Ответ приводится к единому формату {@link ICmsResponse} с флагом успеха и HTTP-статусом.
+ * Ответ приводится к единому формату {@link CmsResponse} с флагом успеха и HTTP-статусом.
  *
  * Результат обработчика кэшируется на 24 часа. При изменении соответствующего
  * контента Directus webhook может досрочно инвалидировать этот кэш.
@@ -26,10 +26,10 @@ import type { Query, UnpackList } from '@directus/sdk';
  * @throws Ошибку валидации, если параметр `collection` отсутствует
  * или не соответствует имени зарегистрированной regular- или singleton-коллекции.
  *
- * @returns Promise с результатом запроса к Directus в формате {@link ICmsResponse}.
+ * @returns Promise с результатом запроса к Directus в формате {@link CmsResponse}.
  */
 export default defineCachedEventHandler(
-    async (event): Promise<ICmsResponse> => {
+    async (event): Promise<CmsResponse> => {
         const log = createLogger('DirectusCollection');
 
         try {

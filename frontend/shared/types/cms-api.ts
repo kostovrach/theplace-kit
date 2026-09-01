@@ -9,7 +9,7 @@ import type { Query } from '@directus/sdk';
  * @template T - Тип данных, содержащихся в поле `data`.
  * По умолчанию используется `unknown`.
  */
-export interface ICmsResponse<T = unknown> {
+export interface CmsResponse<T = unknown> {
     /**
      * Флаг успешного выполнения операции.
      */
@@ -46,7 +46,7 @@ export interface ICmsResponse<T = unknown> {
  * {@link Query} из `@directus/sdk`, поскольку на момент разбора
  * query-параметров конкретная коллекция ещё может быть неизвестна.
  */
-export interface ICmsQuery {
+export interface CmsQuery {
     /**
      * Поля, которые должны быть включены в ответ.
      *

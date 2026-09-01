@@ -1,3 +1,3 @@
 import type { EmblaCarouselType } from 'embla-carousel';
 
-export type CarouselInstanceType = { carouselApi: EmblaCarouselType | null };
+export type CarouselInstance = { carouselApi: EmblaCarouselType | null };

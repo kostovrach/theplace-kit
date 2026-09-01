@@ -8,7 +8,7 @@ import type { Query, UnpackList } from '@directus/sdk';
  *
  * @internal
  */
-type LocalQueryType<C extends CollectionNameType> = Query<Schema, UnpackList<Schema[C]>>;
+type LocalQuery<C extends CollectionNameType> = Query<Schema, UnpackList<Schema[C]>>;
 
 /**
  * Параметры запроса к серверному proxy Directus.
@@ -17,7 +17,7 @@ type LocalQueryType<C extends CollectionNameType> = Query<Schema, UnpackList<Sch
  *
  * @internal
  */
-interface IUseCmsParams<C extends CollectionNameType> {
+interface UseCmsParams<C extends CollectionNameType> {
     /**
      * Список полей в формате Directus SDK (объектный или строковый синтаксис).
      *
@@ -25,7 +25,7 @@ interface IUseCmsParams<C extends CollectionNameType> {
      * @example
      * ['*', { cover: ['*'], author: ['id', 'name'] }]
      */
-    fields?: LocalQueryType<C>['fields'];
+    fields?: LocalQuery<C>['fields'];
 
     /**
      * Синтаксический сахар для вложенных связей.
@@ -50,7 +50,7 @@ interface IUseCmsParams<C extends CollectionNameType> {
      * @example
      * { status: { _eq: 'published' } }
      */
-    filter?: LocalQueryType<C>['filter'];
+    filter?: LocalQuery<C>['filter'];
 
     /**
      * Сортировка.
@@ -58,7 +58,7 @@ interface IUseCmsParams<C extends CollectionNameType> {
      * @example
      * ['-date_created', 'title']
      */
-    sort?: LocalQueryType<C>['sort'];
+    sort?: LocalQuery<C>['sort'];
 
     /**
      * Ограничение количества возвращаемых элементов.
@@ -85,7 +85,7 @@ interface IUseCmsParams<C extends CollectionNameType> {
     /**
      * Параметры для фильтрации / сортировки / лимита на уровне вложенных связей.
      */
-    deep?: LocalQueryType<C>['deep'];
+    deep?: LocalQuery<C>['deep'];
 }
 
 /**
@@ -94,7 +94,7 @@ interface IUseCmsParams<C extends CollectionNameType> {
  *
  * @internal
  */
-interface IUseCmsResponse<T> {
+interface UseCmsResponse<T> {
     /**
      * Реактивные данные коллекции / элемента / singleton. `null` в случае, если:
      * - запрос еще не завершен;
@@ -174,7 +174,7 @@ function parseRelations(relations: string[]): string[] {
  * @internal
  */
 function buildQuery<C extends CollectionNameType>(
-    params: IUseCmsParams<C> = {}
+    params: UseCmsParams<C> = {}
 ): Record<string, string> {
     const query: Record<string, string> = {};
 
@@ -213,16 +213,16 @@ function buildQuery<C extends CollectionNameType>(
  * Фабрика обработчика для {@link useAsyncData}.
  * Создает функцию, которая выполняет `$fetch` к указанному URL.
  *
- * @template T - Ожидаемый тип данных внутри `ICmsResponse`
+ * @template T - Ожидаемый тип данных внутри `CmsResponse`
  * @param url - Endpoint API (`/api/cms/...`)
  * @param query - Query-параметры
- * @returns Async-функция, возвращающая `ICmsResponse<T>`
+ * @returns Async-функция, возвращающая `CmsResponse<T>`
  * 
  * @internal
  */
 function createCmsFetcher<T>(url: string, query: Record<string, string>) {
-    return async (): Promise<ICmsResponse<T>> => {
-        return await $fetch<ICmsResponse<T>>(url, { query });
+    return async (): Promise<CmsResponse<T>> => {
+        return await $fetch<CmsResponse<T>>(url, { query });
     };
 }
 
@@ -262,7 +262,7 @@ export function useCms() {
  *
  * @template C - Имя regular-коллекции
  * @param collection - Название коллекции
- * @param params - Параметры запроса ({@link IUseCmsParams})
+ * @param params - Параметры запроса ({@link UseCmsParams})
  * @param requestOpts - Опции {@link useAsyncData} (lazy, server, immediate, watch…)
  * @returns Объект с `content`, `error`, `status` и `refresh`
  *
@@ -275,9 +275,9 @@ export function useCms() {
  */
 async function useCmsCollection<C extends RegularCollectionType>(
     collection: C,
-    params: IUseCmsParams<C> = {},
-    requestOpts: AsyncDataOptions<ICmsResponse<Schema[C]>> = {}
-): Promise<IUseCmsResponse<Schema[C]>> {
+    params: UseCmsParams<C> = {},
+    requestOpts: AsyncDataOptions<CmsResponse<Schema[C]>> = {}
+): Promise<UseCmsResponse<Schema[C]>> {
     const query = buildQuery<C>(params);
     const key = `cms:collection:${collection}:${JSON.stringify(query)}`;
 
@@ -307,7 +307,7 @@ async function useCmsCollection<C extends RegularCollectionType>(
  *
  * @template C - Имя singleton-коллекции
  * @param collection - Название коллекции
- * @param params - Параметры запроса ({@link IUseCmsParams})
+ * @param params - Параметры запроса ({@link UseCmsParams})
  * @param requestOpts - Опции {@link useAsyncData} (lazy, server, immediate, watch…)
  * @returns Объект с `content`, `error`, `status` и `refresh`
  *
@@ -318,9 +318,9 @@ async function useCmsCollection<C extends RegularCollectionType>(
  */
 async function useCmsSingleton<C extends SingletonCollectionType>(
     collection: C,
-    params: IUseCmsParams<C> = {},
-    requestOpts: AsyncDataOptions<ICmsResponse<Schema[C]>> = {}
-): Promise<IUseCmsResponse<Schema[C]>> {
+    params: UseCmsParams<C> = {},
+    requestOpts: AsyncDataOptions<CmsResponse<Schema[C]>> = {}
+): Promise<UseCmsResponse<Schema[C]>> {
     const query = buildQuery<C>(params);
     const key = `cms:singleton:${collection}:${JSON.stringify(query)}`;
 
@@ -351,7 +351,7 @@ async function useCmsSingleton<C extends SingletonCollectionType>(
  * @template C - Имя regular-коллекции
  * @param collection - Название коллекции
  * @param id - Primary key элемента
- * @param params - Параметры запроса ({@link IUseCmsParams})
+ * @param params - Параметры запроса ({@link UseCmsParams})
  * @param requestOpts - Опции {@link useAsyncData} (lazy, server, immediate, watch…)
  * @returns Объект с `content`, `error`, `status` и `refresh`
  *
@@ -363,9 +363,9 @@ async function useCmsSingleton<C extends SingletonCollectionType>(
 async function useCmsItem<C extends RegularCollectionType>(
     collection: C,
     id: string | number,
-    params: IUseCmsParams<C> = {},
-    requestOpts: AsyncDataOptions<ICmsResponse<UnpackList<Schema[C]>>> = {}
-): Promise<IUseCmsResponse<UnpackList<Schema[C]>>> {
+    params: UseCmsParams<C> = {},
+    requestOpts: AsyncDataOptions<CmsResponse<UnpackList<Schema[C]>>> = {}
+): Promise<UseCmsResponse<UnpackList<Schema[C]>>> {
     const query = buildQuery<C>(params);
     const key = `cms:item:${collection}:${id}:${JSON.stringify(query)}`;
 

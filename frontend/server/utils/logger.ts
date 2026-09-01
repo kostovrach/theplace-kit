@@ -4,7 +4,7 @@
  * Уровни определяют приоритет сообщения и используются для фильтрации
  * вывода в соответствии с уровнем, заданным в runtime-конфигурации.
  */
-type LogLevelType = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 /**
  * Приоритеты уровней логирования.
@@ -15,7 +15,7 @@ type LogLevelType = 'debug' | 'info' | 'warn' | 'error';
  *
  * @internal
  */
-const LOG_LEVELS: Record<LogLevelType, number> = {
+const LOG_LEVELS: Record<LogLevel, number> = {
     debug: 0,
     info: 1,
     warn: 2,
@@ -30,7 +30,7 @@ const LOG_LEVELS: Record<LogLevelType, number> = {
  *
  * @internal
  */
-const METHODS: Record<LogLevelType, 'log' | 'warn' | 'error'> = {
+const METHODS: Record<LogLevel, 'log' | 'warn' | 'error'> = {
     debug: 'log',
     info: 'log',
     warn: 'warn',
@@ -99,7 +99,7 @@ function getFormattedTime(): string {
  *
  * @internal
  */
-function isLogLevel(value: string): value is LogLevelType {
+function isLogLevel(value: string): value is LogLevel {
     return Object.hasOwn(LOG_LEVELS, value);
 }
 
@@ -166,7 +166,7 @@ export function createLogger(scope: string) {
      *
      * @internal
      */
-    function log(level: LogLevelType, ...args: unknown[]) {
+    function log(level: LogLevel, ...args: unknown[]) {
         if (LOG_LEVELS[level] < threshold) return;
         const displayLevel = level.toUpperCase().padEnd(5);
 
