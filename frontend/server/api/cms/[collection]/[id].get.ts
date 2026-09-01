@@ -33,45 +33,56 @@ import type { Query, UnpackList } from '@directus/sdk';
  */
 export default defineCachedEventHandler(
     async (event): Promise<ICmsResponse> => {
-        const collection = getRouterParam(event, 'collection');
-        const id = getRouterParam(event, 'id');
+        const log = createLogger('DirectusItem');
 
-        assertCollection(collection);
+        try {
+            const collection = getRouterParam(event, 'collection');
+            const id = getRouterParam(event, 'id');
 
-        if (!id || !id.length) {
-            throw createError({
-                status: 400,
-                message: 'Parameter "id" is required',
-            });
-        }
+            assertCollection(collection);
 
-        const query = parseCmsQuery(getQuery(event));
+            if (!id || !id.length) {
+                log.error('Missing ID');
+                throw createError({
+                    status: 400,
+                    message: 'Parameter "id" is required',
+                });
+            }
 
-        /**
-         * Проверка, является ли указанная коллекция regular-коллекцией.
-         *
-         * Только regular-коллекции поддерживают получение отдельного элемента через {@link readItem}.
-         * Для singleton-коллекций используется другой API-метод Directus, поэтому такие запросы отклоняются.
-         */
-        if (isRegularCollection(collection)) {
-            const res = await directus.request<Schema[typeof collection]>(
-                readItem(
-                    collection,
-                    id,
-                    query as Query<Schema, UnpackList<Schema[typeof collection]>>
-                )
-            );
-            return { success: true, status: 200, data: res, message: 'OK' };
-        } else {
+            const query = parseCmsQuery(getQuery(event));
+
             /**
-             * Singleton-коллекции не поддерживают получение элемента по `id`.
+             * Проверка, является ли указанная коллекция regular-коллекцией.
              *
-             * Такой запрос считается некорректным для данного endpoint и завершается HTTP-ошибкой `400`.
+             * Только regular-коллекции поддерживают получение отдельного элемента через {@link readItem}.
+             * Для singleton-коллекций используется другой API-метод Directus, поэтому такие запросы отклоняются.
              */
-            throw createError({
-                status: 400,
-                message: 'Parameter "collection" must be the name of regular collection',
-            });
+            if (isRegularCollection(collection)) {
+                const res = await directus.request<Schema[typeof collection]>(
+                    readItem(
+                        collection,
+                        id,
+                        query as Query<Schema, UnpackList<Schema[typeof collection]>>
+                    )
+                );
+
+                setResponseStatus(event, 200);
+                return { success: true, status: 200, data: res, message: 'OK' };
+            } else {
+                /**
+                 * Singleton-коллекции не поддерживают получение элемента по `id`.
+                 *
+                 * Такой запрос считается некорректным для данного endpoint и завершается HTTP-ошибкой `400`.
+                 */
+                log.error('Parameter "collection" must be the name of regular collection');
+                throw createError({
+                    status: 400,
+                    message: 'Parameter "collection" must be the name of regular collection',
+                });
+            }
+        } catch (err) {
+            log.error('Failed to get item from Directus:', err);
+            throw err;
         }
     },
     {

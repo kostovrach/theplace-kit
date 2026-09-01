@@ -1,2 +1,0 @@
-// Auto-generated. Do not edit.
-export type SpriteKeyType = 'common-arrow' | 'common-chat' | 'common-checkmark' | 'common-chevron' | 'common-cookie' | 'common-cross' | 'common-curved-arrow' | 'common-globe' | 'common-lock' | 'common-map-pin' | 'common-minus' | 'common-phone' | 'common-play' | 'common-plus' | 'common-quote' | 'common-search' | 'common-share' | 'common-star' | 'pixel-hammer' | 'pixel-stars' | 'socials-instagram' | 'socials-ok' | 'socials-telegram' | 'socials-telegram-nofill' | 'socials-vk' | 'socials-vk-nofill';

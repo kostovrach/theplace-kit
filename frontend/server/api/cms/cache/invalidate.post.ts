@@ -1,5 +1,3 @@
-const LOG_PREFIX = '[CmsCache]';
-
 /**
  * Обработчик webhook для досрочного сброса кэша CMS.
  *
@@ -19,18 +17,21 @@ const LOG_PREFIX = '[CmsCache]';
  */
 export default defineEventHandler(
     async (event): Promise<{ success: boolean; status: number; message: string }> => {
+        const log = createLogger('CmsCache');
         const config = useRuntimeConfig();
+
+        log.debug('Cache invalidation request for collection');
 
         const secretHeader = getHeader(event, 'x-webhook-secret');
         const webhookSecret = config.directus.webhookSecret;
 
         if (!webhookSecret.length || secretHeader !== webhookSecret) {
-            setResponseStatus(event, 401);
+            log.error('Unauthorized: Invalid webhook secret');
 
-            logger('error', LOG_PREFIX, 'Unauthorized: Invalid webhook secret');
+            setResponseStatus(event, 401);
             return { success: false, status: 401, message: 'Unauthorized: Invalid webhook secret' };
         }
-        
+
         /**
          * Имя коллекции, содержимое которой было изменено в Directus.
          *
@@ -39,9 +40,12 @@ export default defineEventHandler(
          */
         const collection = await readBody<string | undefined>(event);
 
+        log.debug('Full request body:', collection);
+
         if (!collection) {
+            log.error('Bad Request: Collection name is missing');
+
             setResponseStatus(event, 400);
-            logger('warn', LOG_PREFIX, 'Bad Request: Collection name is missing');
             return {
                 success: false,
                 status: 400,
@@ -71,16 +75,14 @@ export default defineEventHandler(
 
             await Promise.all(keysToRemove.map((key) => cache.removeItem(key)));
 
-            logger(
-                'warn',
-                LOG_PREFIX,
+            log.info(
                 `Successfully cleared ${keysToRemove.length} cache entries for collection: "${collection}"`
             );
 
             setResponseStatus(event, 200);
             return { success: true, status: 200, message: 'OK' };
         } catch (err) {
-            logger('error', LOG_PREFIX, 'Error clearing Nitro cache:', err);
+            log.error('Error clearing Nitro cache:', err);
 
             setResponseStatus(event, 500);
             return { success: false, status: 500, message: 'Internal Server Error' };

@@ -1,4 +1,43 @@
 /**
+ * Допустимые уровни сообщений логгера.
+ *
+ * Уровни определяют приоритет сообщения и используются для фильтрации
+ * вывода в соответствии с уровнем, заданным в runtime-конфигурации.
+ */
+type LogLevelType = 'debug' | 'info' | 'warn' | 'error';
+
+/**
+ * Приоритеты уровней логирования.
+ *
+ * Чем меньше значение, тем ниже приоритет уровня.
+ * Сообщения с приоритетом ниже установленного уровня логирования
+ * не выводятся.
+ *
+ * @internal
+ */
+const LOG_LEVELS: Record<LogLevelType, number> = {
+    debug: 0,
+    info: 1,
+    warn: 2,
+    error: 3,
+};
+
+/**
+ * Соответствие уровней логирования методам объекта {@link console}.
+ *
+ * Уровни `debug` и `info` используют {@link console.log},
+ * `warn` - {@link console.warn}, `error` - {@link console.error}.
+ *
+ * @internal
+ */
+const METHODS: Record<LogLevelType, 'log' | 'warn' | 'error'> = {
+    debug: 'log',
+    info: 'log',
+    warn: 'warn',
+    error: 'error',
+};
+
+/**
  * Кэш текущей секунды Unix time.
  *
  * Используется совместно с {@link cachedFormattedTime}, для предотвращения форматирования даты при каждом вызове {@link getFormattedTime}.
@@ -23,8 +62,8 @@ let cachedFormattedTime = '';
  * Получение текущей локальной даты и времени в формате `YYYY-MM-DD HH:mm:ss`.
  *
  * Форматирование выполняется только при изменении текущей секунды.
- * Повторные вызовы в течение одной секунды возвращают кэшированное значение,
- * во избежании создания объекта {@link Date} и повторного форматирования строки при каждом вызове {@link logger}.
+ * Повторные вызовы в течение одной секунды используют кэшированное значение
+ * без создания нового объекта {@link Date} и повторного форматирования строки.
  *
  * Временная зона определяется окружением, в котором выполняется код.
  *
@@ -56,43 +95,129 @@ function getFormattedTime(): string {
 }
 
 /**
- * Унифицированный вывод сообщения в консоль с временной меткой и префиксом.
+ * Валидация рантайм значения для уровня логирования
  *
- * Уровень логирования определяется первым аргументом и может быть одним из
- * стандартных методов объекта {@link console}: `log`, `warn` или `error`.
- *
- * Фактический вывод дополнительно ограничивается уровнем логирования,
- * заданным в runtime-конфигурации приложения через `logger.level`.
- *
- * При уровне `WARN` обычные сообщения (`log`) не выводятся.
- * При уровне `ERROR` выводятся только сообщения об ошибках (`error`).
- *
- * Каждая запись получает единый формат:
- *
- * `[YYYY-MM-DD HH:mm:ss] LEVEL [PREFIX]: content`
- *
- * Пример вывода:
- *
- * `[2026-05-12 14:32:11] LOG   [DEBUG]: content loaded`
- *
- * Дополнительные аргументы передаются в соответствующий метод {@link console} без преобразования.
- *
- * @param level Уровень логирования. По умолчанию используется `log`.
- * @param prefix Короткий идентификатор или категория сообщения, используемый для определения источника записи в логе.
- * @param args Произвольные данные, передаваемые в консоль после префикса.
- *
- * @returns `void`
+ * @internal
  */
-export function logger(
-    level: 'log' | 'warn' | 'error' = 'log',
-    prefix: string,
-    ...args: unknown[]
-) {
-    const LOG_LEVEL = useRuntimeConfig().logger.level;
-    const displayLevel = `${level.toUpperCase()}  `.slice(0, 5);
+function isLogLevel(value: string): value is LogLevelType {
+    return Object.hasOwn(LOG_LEVELS, value);
+}
 
-    if (LOG_LEVEL === 'WARN' && level === 'log') return;
-    if (LOG_LEVEL === 'ERROR' && (level === 'log' || level === 'warn')) return;
+/**
+ * Фабрика серверного логгера.
+ *
+ * Создание экземпляра логгера с заданной областью логирования.
+ * Уровень логирования определяется при создании экземпляра через
+ * runtime-конфигурацию приложения.
+ *
+ * Поддерживаются следующие уровни:
+ * - `debug` - отладочная информация;
+ * - `info`  - информационные сообщения;
+ * - `warn`  - предупреждения;
+ * - `error` - сообщения об ошибках.
+ *
+ * Сообщения с уровнем ниже установленного в runtime-конфигурации
+ * не выводятся.
+ *
+ * Каждая запись имеет формат:
+ * `[YYYY-MM-DD HH:mm:ss] LEVEL [SCOPE] content`
+ *
+ * Дополнительные аргументы передаются в соответствующий метод
+ * объекта {@link console} без преобразования.
+ *
+ * @param scope Область или источник логирования.
+ *
+ * @returns Объект с методами `debug`, `info`, `warn` и `error`.
+ *
+ * @example
+ * const log = createLogger('CMS');
+ *
+ * log.debug('Request parameters:', params);
+ * log.info('Request started');
+ * log.warn('Unexpected response');
+ * log.error('Request failed', error);
+ */
+export function createLogger(scope: string) {
+    /**
+     * Уровень логирования, заданный в runtime-конфигурации приложения.
+     *
+     * @internal
+     */
+    const runtimeLevel = useRuntimeConfig().logger.level.toLowerCase();
 
-    console[level](`[${getFormattedTime()}]`, displayLevel, `[${prefix}]:`, ...args);
+    if (!isLogLevel(runtimeLevel)) {
+        throw new Error(`Invalid logger level: "${runtimeLevel}"`);
+    }
+
+    /**
+     * Минимальный приоритет сообщения, допускаемый для вывода.
+     *
+     * @internal
+     */
+    const threshold = LOG_LEVELS[runtimeLevel];
+
+    /**
+     * Вывод сообщения с заданным уровнем логирования.
+     *
+     * @param level Уровень логирования.
+     * @param args Данные, передаваемые в консоль без преобразования.
+     *
+     * @returns `void`
+     *
+     * @internal
+     */
+    function log(level: LogLevelType, ...args: unknown[]) {
+        if (LOG_LEVELS[level] < threshold) return;
+        const displayLevel = level.toUpperCase().padEnd(5);
+
+        console[METHODS[level]](`[${getFormattedTime()}]`, displayLevel, `[${scope}]`, ...args);
+    }
+
+    /**
+     * Вывод отладочного сообщения.
+     *
+     * Сообщения выводятся только при установленном уровне `DEBUG`.
+     *
+     * @param args Данные, передаваемые в консоль без преобразования.
+     *
+     * @returns `void`
+     */
+    function debug(...args: unknown[]) {
+        log('debug', ...args);
+    }
+
+    /**
+     * Вывод информационного сообщения.
+     *
+     * @param args Данные, передаваемые в консоль без преобразования.
+     *
+     * @returns `void`
+     */
+    function info(...args: unknown[]) {
+        log('info', ...args);
+    }
+
+    /**
+     * Вывод предупреждения.
+     *
+     * @param args Данные, передаваемые в консоль без преобразования.
+     *
+     * @returns `void`
+     */
+    function warn(...args: unknown[]) {
+        log('warn', ...args);
+    }
+
+    /**
+     * Вывод сообщения об ошибке.
+     *
+     * @param args Данные, передаваемые в консоль без преобразования.
+     *
+     * @returns `void`
+     */
+    function error(...args: unknown[]) {
+        log('error', ...args);
+    }
+
+    return { debug, info, warn, error };
 }

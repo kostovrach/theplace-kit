@@ -30,37 +30,48 @@ import type { Query, UnpackList } from '@directus/sdk';
  */
 export default defineCachedEventHandler(
     async (event): Promise<ICmsResponse> => {
-        const collection = getRouterParam(event, 'collection');
+        const log = createLogger('DirectusCollection');
 
-        assertCollection(collection);
+        try {
+            const collection = getRouterParam(event, 'collection');
 
-        const query = parseCmsQuery(getQuery(event));
+            assertCollection(collection);
 
-        /**
-         * Для singleton-коллекции выполняется запрос singletion объекта.
-         *
-         * Тип запроса связывается с конкретной коллекцией через {@link Schema},
-         * что позволяет сохранить типизацию результата в соответствии со схемой Directus.
-         */
-        if (isSingletonCollection(collection)) {
+            const query = parseCmsQuery(getQuery(event));
+
+            /**
+             * Для singleton-коллекции выполняется запрос singletion объекта.
+             *
+             * Тип запроса связывается с конкретной коллекцией через {@link Schema},
+             * что позволяет сохранить типизацию результата в соответствии со схемой Directus.
+             */
+            if (isSingletonCollection(collection)) {
+                const res = await directus.request<Schema[typeof collection]>(
+                    readSingleton(collection, query as Query<Schema, Schema[typeof collection]>)
+                );
+
+                setResponseStatus(event, 200);
+                return { success: true, status: 200, data: res, message: 'OK' };
+            }
+
+            /**
+             * Для regular коллекции выполняется запрос списка элементов.
+             *
+             * После проверки {@link assertCollection} значение `collection` гарантированно относится к допустимой regular коллекции.
+             *
+             * {@link UnpackList} извлекает тип отдельного элемента из типа списка,
+             * позволяя корректно типизировать параметры запроса {@link Query} для {@link readItems}.
+             */
             const res = await directus.request<Schema[typeof collection]>(
-                readSingleton(collection, query as Query<Schema, Schema[typeof collection]>)
+                readItems(collection, query as Query<Schema, UnpackList<Schema[typeof collection]>>)
             );
-            return { success: true, status: 200, data: res, message: 'OK' };
-        }
 
-        /**
-         * Для regular коллекции выполняется запрос списка элементов.
-         *
-         * После проверки {@link assertCollection} значение `collection` гарантированно относится к допустимой regular коллекции.
-         *
-         * {@link UnpackList} извлекает тип отдельного элемента из типа списка,
-         * позволяя корректно типизировать параметры запроса {@link Query} для {@link readItems}.
-         */
-        const res = await directus.request<Schema[typeof collection]>(
-            readItems(collection, query as Query<Schema, UnpackList<Schema[typeof collection]>>)
-        );
-        return { success: true, status: 200, data: res, message: 'OK' };
+            setResponseStatus(event, 200);
+            return { success: true, status: 200, data: res, message: 'OK' };
+        } catch (err) {
+            log.error('Failed to get collection from Directus:', err);
+            throw err;
+        }
     },
     {
         /**

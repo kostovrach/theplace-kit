@@ -7,8 +7,6 @@
 .vercel
 dist
 
-app/assets/svg/gen
-
 # Node dependencies
 node_modules
 
