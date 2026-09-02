@@ -1,5 +1,7 @@
 <template>
-    <div
+    <component
+        v-bind="{ ...$attrs }"
+        :is="props.is"
         ref="carouselRef"
         :class="['carousel', props.class]"
         :style="{ overflow: props.overflow }"
@@ -7,7 +9,6 @@
         @touchstart="mouseEnterHandler"
         @mouseleave="mouseLeaveHandler"
         @touchend="mouseLeaveHandler"
-        v-bind="{ ...$attrs }"
     >
         <div
             class="carousel__container"
@@ -21,7 +22,7 @@
         >
             <slot></slot>
         </div>
-    </div>
+    </component>
 </template>
 
 <script setup lang="ts">
@@ -36,24 +37,108 @@
 
     const props = withDefaults(
         defineProps<{
+            /**
+             * Component HTML tag
+             *
+             * @default 'div'
+             */
+            is?: keyof HTMLElementTagNameMap;
+
+            /**
+             * Additional CSS class
+             */
             class?: string | Record<string, unknown>;
 
-            // state
+            /**
+             * Native Embla options
+             *
+             * @see https://www.embla-carousel.com/docs/v8/api/options
+             */
             options?: EmblaOptionsType;
+
+            /**
+             * Внутренний отступ контейнера
+             *
+             * @default '0px'
+             */
             padding?: string;
+
+            /**
+             * Режим переполнения
+             *
+             * @default 'hidden'
+             */
             overflow?: 'hidden' | 'visible';
+
+            /**
+             * Направление карусели
+             *
+             * @default 'x'
+             */
             axis?: 'x' | 'y';
+
+            /**
+             * Отступ между слайдами
+             *
+             * @default 0
+             */
             spaceBetween?: number;
 
-            // plugins
+            /**
+             * Embla Fade plugin
+             *
+             * @default false
+             *
+             * @see https://www.embla-carousel.com/docs/v8/plugins/fade
+             */
             fade?: boolean;
+
+            /**
+             * Embla Autoplay plugin
+             *
+             * @default false
+             *
+             * @see https://www.embla-carousel.com/docs/v8/plugins/autoplay
+             */
             autoplay?: boolean;
+
+            /**
+             * Embla Autoheight plugin
+             *
+             * @default false
+             *
+             * @see https://www.embla-carousel.com/docs/v8/plugins/auto-height
+             */
             autoHeight?: boolean;
+
+            /**
+             * Embla Autoscroll plugin
+             *
+             * @default false
+             *
+             * @see https://www.embla-carousel.com/docs/v8/plugins/auto-scroll
+             */
             autoScroll?: boolean;
 
-            // plugins options
+            /**
+             * Native Embla Autoscroll plugin options
+             *
+             * @see https://www.embla-carousel.com/docs/v8/plugins/auto-scroll
+             */
             autoScrollOptions?: AutoScrollOptionsType;
+
+            /**
+             * Native Embla Autoplay plugin options
+             *
+             * @see https://www.embla-carousel.com/docs/v8/plugins/autoplay
+             */
             autoplayOptions?: AutoplayOptionsType;
+
+            /**
+             * Остановка анимации Autoplay / Autocroll при ховере
+             *
+             * @default false
+             */
             stopScrollOnHover?: boolean;
         }>(),
         {
@@ -63,7 +148,7 @@
             options: () => ({}),
             axis: 'x',
             spaceBetween: 0,
-            padding: '0',
+            padding: '0px',
             overflow: 'hidden',
 
             // plugins

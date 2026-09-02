@@ -1,9 +1,9 @@
 <template>
     <component
+        v-bind="{ ...$attrs }"
         :is="props.is"
         :style="{ flex: `0 0 ${props.width}` }"
-        class="carousel-slide"
-        v-bind="{ ...$attrs }"
+        :class="[props.class, 'carousel-slide']"
     >
         <slot></slot>
     </component>
@@ -12,8 +12,23 @@
 <script setup lang="ts">
     const props = withDefaults(
         defineProps<{
-            /** Component tag */
+            /**
+             * Component HTML tag
+             *
+             * @default 'div'
+             */
             is?: keyof HTMLElementTagNameMap;
+
+            /**
+             * Additional CSS class
+             */
+            class?: string | Record<string, unknown> | string[];
+
+            /**
+             * Размер слайда по умолчанию
+             *
+             * @default '100%'
+             */
             width?: string;
         }>(),
         {

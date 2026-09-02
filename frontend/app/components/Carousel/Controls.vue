@@ -1,15 +1,15 @@
 <template>
     <div
-        :class="['carousel-controls', `carousel-controls--${props.direction}`]"
+        v-bind="{ ...$attrs }"
         :style="{
             width: props.direction === 'horizontal' ? props.size : 'fit-content',
             height: props.direction === 'vertical' ? props.size : 'fit-content',
         }"
+        :class="['carousel-controls', `carousel-controls--${props.direction}`]"
         @mouseenter="mouseenterHandler"
         @mouseleave="mouseleaveHandler"
         @touchstart="mouseenterHandler"
         @touchend="mouseleaveHandler"
-        v-bind="{ ...$attrs }"
     >
         <button
             class="carousel-controls__button carousel-controls__button--prev"
@@ -17,7 +17,7 @@
             @click="scrollPrev"
             :disabled="!canScrollPrev"
         >
-            <SvgSprite :name="props.buttonIcon" :size="20" />
+            <SvgSprite v-if="props.buttonIcon" :name="props.buttonIcon" :size="20" />
         </button>
 
         <div v-if="props.pagination === 'bullets'" class="carousel-controls__bullets">
@@ -45,7 +45,7 @@
             @click="scrollNext"
             :disabled="!canScrollNext"
         >
-            <SvgSprite :name="props.buttonIcon" :size="20" />
+            <SvgSprite v-if="props.buttonIcon" :name="props.buttonIcon" :size="20" />
         </button>
     </div>
 </template>
@@ -53,17 +53,47 @@
 <script setup lang="ts">
     const props = withDefaults(
         defineProps<{
+            /**
+             * Размер слайда
+             *
+             * @default 'fit-content'
+             */
             size?: 'fit-content' | '100%' | 'auto';
+
+            /**
+             * Направление
+             *
+             * @default 'horizontal'
+             */
             direction?: 'horizontal' | 'vertical';
+
+            /**
+             * Вариант пагинации
+             *
+             * - `none`:    отсуствие пагинации
+             * - `num`:     числовая пагинация вида 5/12
+             * - `bullets`: точечная пагинация
+             *
+             * @default 'none'
+             */
             pagination?: 'none' | 'num' | 'bullets';
+
+            /**
+             * Инстанс слайдера для управления
+             */
             for: ComputedRef<CarouselInstance | null>;
+
+            /**
+             * Ключ иконки из спрайта для кнопок
+             *
+             * @default ''
+             */
             buttonIcon?: SpriteKey;
         }>(),
         {
             size: 'fit-content',
             pagination: 'none',
             direction: 'horizontal',
-            buttonIcon: 'common-chevron',
         }
     );
 

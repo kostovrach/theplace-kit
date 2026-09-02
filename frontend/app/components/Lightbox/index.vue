@@ -9,13 +9,21 @@
 
     const props = withDefaults(
         defineProps<{
-            /** Component tag */
+            /**
+             * Component HTML tag
+             *
+             * @default 'div'
+             */
             is?: keyof HTMLElementTagNameMap;
+
+            /**
+             * Native Fancybox options
+             *
+             * @see https://fancyapps.com/fancybox/api/options/
+             */
             options?: FancyboxOptions;
         }>(),
-        {
-            is: 'div',
-        }
+        { is: 'div' }
     );
 
     const { $lightbox } = useNuxtApp();
