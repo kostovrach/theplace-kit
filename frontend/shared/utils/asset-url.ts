@@ -236,10 +236,9 @@ function resolveBaseUrl(explicit?: string): string | null {
 function resolveFilename(filename: string | null, option?: boolean | string): string | null {
     if (option === undefined || option === false) return null;
 
-    const raw = typeof option === 'string' ? option : filename;
-    if (!raw) return null;
-
-    const slug = slugify(raw);
+    const slug = typeof option === 'string' ? option : filename;
+    if (!slug) return null;
+    
     return slug || null;
 }
 
@@ -345,7 +344,7 @@ function isRasterImage(mimeType: string | null): boolean {
  */
 function isAutoWebpEnabled(): boolean {
     try {
-        return Boolean(useRuntimeConfig().public.directus.autoWebp);
+        return useRuntimeConfig().public.directus.autoWebp;
     } catch {
         return false;
     }

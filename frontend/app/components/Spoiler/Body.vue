@@ -26,13 +26,13 @@
     const props = withDefaults(
         defineProps<{
             /**
-             * Component tag
+             * Component HTML tag
              *
              * @default 'div'
              */
             is?: keyof HTMLElementTagNameMap;
             /**
-             * CSS class
+             * Additional CSS class
              */
             class?: string | Record<string, unknown> | string[];
         }>(),

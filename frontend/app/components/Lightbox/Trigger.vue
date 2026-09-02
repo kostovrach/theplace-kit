@@ -1,7 +1,7 @@
 <template>
     <a
         v-bind="{ ...$attrs }"
-        data-lightbox
+        :data-lightbox="props.hashKey"
         :href="props.source"
         target="_self"
         :class="['lightbox-trigger', props.class]"
@@ -11,11 +11,17 @@
 </template>
 
 <script setup lang="ts">
-    const props = defineProps<{
-        /** Источник контента для открытия в lightbox */
-        source: string;
+    const props = withDefaults(
+        defineProps<{
+            /** Источник контента для открытия в lightbox */
+            source: string;
 
-        /** Additional CSS class */
-        class?: string | Record<string, unknown> | string[];
-    }>();
+            /** Ключ для хэш-навигации */
+            hashKey?: string;
+
+            /** Additional CSS class */
+            class?: string | Record<string, unknown> | string[];
+        }>(),
+        { hashKey: '' }
+    );
 </script>

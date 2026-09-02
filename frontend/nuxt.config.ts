@@ -43,7 +43,7 @@ export default defineNuxtConfig({
             siteUrl: process.env.SITE_URL || '',
             directus: {
                 url: process.env.DIRECTUS_URL || '',
-                autoWebp: Boolean(process.env.DIRECTUS_AUTO_WEBP) || true,
+                autoWebp: process.env.DIRECTUS_AUTO_WEBP === 'true'
             },
         },
         logger: {

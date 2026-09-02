@@ -128,7 +128,7 @@ interface UseCmsResponse<T> {
  *
  * @param relations - Массив строк связей
  * @returns Плоский массив field-путей
- * 
+ *
  * @internal
  */
 function parseRelations(relations: string[]): string[] {
@@ -170,7 +170,7 @@ function parseRelations(relations: string[]): string[] {
  * @template C - Имя коллекции
  * @param params - Параметры запроса
  * @returns Объект, готовый к передаче в `$fetch` как `query`
- * 
+ *
  * @internal
  */
 function buildQuery<C extends CollectionNameType>(
@@ -217,7 +217,7 @@ function buildQuery<C extends CollectionNameType>(
  * @param url - Endpoint API (`/api/cms/...`)
  * @param query - Query-параметры
  * @returns Async-функция, возвращающая `CmsResponse<T>`
- * 
+ *
  * @internal
  */
 function createCmsFetcher<T>(url: string, query: Record<string, string>) {
@@ -235,18 +235,18 @@ function createCmsFetcher<T>(url: string, query: Record<string, string>) {
  * - `getItem`       - один элемент regular-коллекции по ID    (объект)
  *
  * @example
- * // С использванием relations (сахар)
- * const { content } = await useCms().getCollection('articles', {
- *   relations: ['cover.*', 'blocks.*', 'blocks.item.*', 'blocks.item.image.*'],
- *   filter: { published: { _eq: true } },
- * });
- *
- * @example
- * С использованием fields (полный контроль)
+ * // С использованием fields (полный контроль)
  * const { content, error } = await useCms().getCollection('articles', {
  *   fields: ['id', 'title', { author: ['name'] }],
  *   filter: { status: { _eq: 'published' } },
  *   limit: 10,
+ * });
+ *
+ * @example
+ * // С использванием relations (сахар)
+ * const { content } = await useCms().getCollection('articles', {
+ *   relations: ['cover.*', 'blocks.*', 'blocks.item.*', 'blocks.item.image.*'],
+ *   filter: { published: { _eq: true } },
  * });
  */
 export function useCms() {

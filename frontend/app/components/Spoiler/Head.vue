@@ -18,6 +18,9 @@
 <script setup lang="ts">
     const props = withDefaults(
         defineProps<{
+            /**
+             * Additional CSS class
+             */
             class?: string | Record<string, unknown>;
         }>(),
         {

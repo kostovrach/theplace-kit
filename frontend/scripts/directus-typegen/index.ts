@@ -12,6 +12,7 @@ const log = createLogger();
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL;
 const DIRECTUS_TOKEN = process.env.DIRECTUS_TYPEGEN_TOKEN;
+const AUTO_EXPAND = process.env.DIRECTUS_AUTO_EXPAND === 'true';
 
 function toKebabCase(name: string): string {
     return name
@@ -223,6 +224,43 @@ function extractCollections(raw: string): {
 }
 
 /**
+ * Удаление ID-части из union типов связей.
+ *
+ * @example
+ *   cover: string | DirectusFile<Schema> | null;
+ *   blocks: string[] | ICaseBlock[];
+ *   cases_id: number | ICase | null;
+ *   item: string | ICaseMedia | ICaseText | ... | null;
+ */
+function stripRelationIds(code: string): string {
+    // Одиночные связи (M2O и т.п.)
+    // string | Type | null  =>  Type | null
+    // number | Type | null  =>  Type | null
+    code = code.replace(
+        /(\w+)\s*:\s*(?:string|number)\s*\|\s*([A-Z][\w.<>,\s]+?)(\s*\|\s*null)?;/g,
+        (_, name, type, nullPart = '') => `${name}: ${type.trim()}${nullPart || ''};`
+    );
+
+    // Массивы (O2M / M2M)
+    // string[] | Type[]      =>  Type[]
+    // number[] | Type[]      =>  Type[]
+    // Array<string> | Type[] =>  Type[]
+    code = code.replace(
+        /(\w+)\s*:\s*(?:string\[\]|number\[\]|Array<string>|Array<number>)\s*\|\s*([^;]+);/g,
+        '$1: $2;'
+    );
+
+    // M2A item (несколько возможных типов)
+    // string | TypeA | TypeB | TypeC | null  =>  TypeA | TypeB | TypeC | null
+    code = code.replace(
+        /(\w+)\s*:\s*(?:string|number)\s*\|\s*((?:[A-Z][\w.<>,\s]+\s*\|\s*)+[A-Z][\w.<>,\s]+)(\s*\|\s*null)?;/g,
+        (_, name, types, nullPart = '') => `${name}: ${types.trim()}${nullPart || ''};`
+    );
+
+    return code;
+}
+
+/**
  * Запись разделенных типов коллекций и индексного файла.
  *
  * Для каждого интерфейса выполняются:
@@ -261,6 +299,8 @@ async function writeOutputs(
     const collectionExports: string[] = [];
 
     for (const [name, code] of Object.entries(interfaces)) {
+        const cleanedCode = AUTO_EXPAND ? stripRelationIds(code) : code;
+
         const base = name.replace(/^I/, '');
         const file = `${toKebabCase(base)}.ts`;
 
@@ -269,7 +309,7 @@ async function writeOutputs(
 
         await fs.writeFile(
             path.join(dir, file),
-            `${CONFIG.FILE_HEADER}\n\n` + `${code}\n`,
+            `${CONFIG.FILE_HEADER}\n\n` + `${cleanedCode}\n`,
             'utf-8'
         );
 
