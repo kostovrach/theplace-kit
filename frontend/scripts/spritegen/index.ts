@@ -4,12 +4,12 @@ import path from 'node:path';
 import fg from 'fast-glob';
 
 import { CONFIG } from './config';
-import { createLogger, decoratePath } from '../utils/logger';
+import { createCLILogger, highlightLink } from '../utils/logger';
 
 const COLOR_RE = /(fill|stroke)=["'](#000000|#000|black)["']/gi;
 const EMPTY_SPRITE = '<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>';
 
-const log = createLogger();
+const log = createCLILogger();
 
 /**
  * Гарантированное создание директории и всех отсутствующих родительских директорий.
@@ -176,7 +176,7 @@ async function readFiles() {
  */
 async function writeOutputs(files: string[]) {
     if (files.length === 0) {
-        log.warn(`SVG files not found in ${decoratePath(CONFIG.SVG_DIR)}`);
+        log.warn(`SVG files not found in ${highlightLink(CONFIG.SVG_DIR)}`);
 
         await handleFallback();
         return;
@@ -225,7 +225,7 @@ async function writeOutputs(files: string[]) {
  * Запуск процесса генерации
  */
 async function main() {
-    log.info(`Attempting to generate sprite from ${decoratePath(CONFIG.SVG_DIR)}`);
+    log.info(`Attempting to generate sprite from ${highlightLink(CONFIG.SVG_DIR)}`);
 
     try {
         const { files } = await readFiles();

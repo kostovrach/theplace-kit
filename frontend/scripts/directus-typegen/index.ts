@@ -4,11 +4,11 @@ import { config as dotenv } from 'dotenv';
 import path from 'node:path';
 
 import { CONFIG } from './config';
-import { createLogger, decoratePath } from '../utils/logger';
+import { createCLILogger, highlightLink } from '../utils/logger';
 
 dotenv();
 
-const log = createLogger();
+const log = createCLILogger();
 
 const DIRECTUS_URL = process.env.DIRECTUS_URL;
 const DIRECTUS_TOKEN = process.env.DIRECTUS_TYPEGEN_TOKEN;
@@ -79,7 +79,7 @@ async function handleFallback() {
     } catch {
         /** Создание fallback-структуры при отсутствии индексного файла */
         log.warn(
-            `Index file not found. Creating fallback types stub at: ${decoratePath(indexPath)}`
+            `Index file not found. Creating fallback types stub at: ${highlightLink(indexPath)}`
         );
 
         const fallbackContent = [
@@ -123,7 +123,6 @@ function runTypegen(): boolean {
         `--directus-host ${DIRECTUS_URL}`,
         `--directus-token ${DIRECTUS_TOKEN}`,
         `--output ${CONFIG.TEMP_FILE}`,
-        `--type-prefix I`,
         `--type-style interface`,
         `--include-system-types true`,
     ].join(' ');
@@ -348,14 +347,14 @@ async function writeOutputs(
 async function main() {
     if (!DIRECTUS_URL || !DIRECTUS_TOKEN) {
         log.warn(
-            `Skipping generation: ${decoratePath('DIRECTUS_URL')} or ${decoratePath('DIRECTUS_TYPEGEN_TOKEN')} missing in .env.`,
+            `Skipping generation: ${highlightLink('DIRECTUS_URL')} or ${highlightLink('DIRECTUS_TYPEGEN_TOKEN')} missing in .env.`,
             'Using existing types'
         );
         await handleFallback();
         return;
     }
 
-    log.info(`Attempting to generate types from Directus via URL: ${decoratePath(DIRECTUS_URL)}`);
+    log.info(`Attempting to generate types from Directus via URL: ${highlightLink(DIRECTUS_URL)}`);
 
     try {
         /** Подключение к файлам */

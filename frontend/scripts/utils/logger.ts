@@ -59,7 +59,7 @@ const METHODS: Record<LogLevel, 'log' | 'warn' | 'error'> = {
  *
  * log.error('Some error:', Error);
  */
-export function createLogger() {
+export function createCLILogger() {
     function log(level: LogLevel, ...args: unknown[]) {
         const prefix = PREFIXES[level];
         const method = METHODS[level];
@@ -85,6 +85,6 @@ export function createLogger() {
  *
  * @returns Исходная строка с ANSI-стилизацией для вывода в терминале.
  */
-export function decoratePath(input: string) {
+export function highlightLink(input: string) {
     return styleText('cyanBright', input);
 }
